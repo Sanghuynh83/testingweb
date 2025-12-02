@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "baseUrl: "sanghuynh83.github.io/testingweb"",
+    baseUrl: "sanghuynh83.github.io/testingweb",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
