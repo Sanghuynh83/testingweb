@@ -19,27 +19,6 @@ Up:
 Related:
 - "[[Google Ads.md]]"
 - "[[Nghiên cứu Từ khóa (Keyword Research).md]]"
-- "[[Ý định Tìm kiếm (Search Intent).m---
-MOC: "false"
-Title: "Các loại Đối sánh Từ khóa (Keyword Match Types)"
-Alias:
-- "Keyword Match Types"
-- "Đối sánh Từ khóa"
-Concept_Type:
-- "Concept"
-- "Framework"
-tags:
-- "Concept"
-- "Quản_trị_Kinh_doanh"
-- "Marketing"
-- "Digital_Marketing"
-- "SEM"
-- "Google_Ads"
-Up:
-- "[[SEM (Marketing trên Công cụ Tìm kiếm).md]]"
-Related:
-- "[[Google Ads.md]]"
-- "[[Nghiên cứu Từ khóa (Keyword Research).md]]"
 - "[[Ý định Tìm kiếm (Search Intent).md]]"
 Created: "2025-11-05"
 Updated: "2025-11-05"

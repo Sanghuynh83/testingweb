@@ -19,7 +19,7 @@ Related:
 - "[[Mô hình PESO.md]]"
 Created: "2025-11-05"
 Updated: "2025-11-05"
-Source: "Scott M. Cutlip, "Effective Public Relations""
+Source: "Scott M. Cutlip, Effective Public Relations"
 ---
 
 # [[Quan hệ Báo chí (Media Relations)]]

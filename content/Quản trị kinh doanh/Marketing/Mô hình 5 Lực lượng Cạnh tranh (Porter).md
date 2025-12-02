@@ -21,7 +21,7 @@ Related:
 - "[[Phân tích SWOT (SWOT Analysis).md]]"
 Created: "2025-11-05"
 Updated: "2025-11-05"
-Source: "Michael E. Porter, "Competitive Strategy" (1980)"
+Source: "Michael E. Porter, Competitive Strategy (1980)"
 ---
 
 # [[Mô hình 5 Lực lượng Cạnh tranh (Porter)]]

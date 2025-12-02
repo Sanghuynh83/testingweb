@@ -26,7 +26,7 @@ Related:
 - "[[Viết Tiêu đề (Headline).md]]"
 Created: "2025-11-06"
 Updated: "2025-11-06"
-Source: "Eugene Schwartz, "Breakthrough Advertising""
+Source: "Eugene Schwartz, Breakthrough Advertising"
 ---
 
 # [[Các Cấp độ Nhận thức của Khách hàng (Schwartz)]]

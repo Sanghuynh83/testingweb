@@ -16,15 +16,15 @@ tags:
 - "Copywriting"
 - "Chiến_lược_Sản_phẩm"
 Up:
-- "[[Copywriting (Viết Quảng cáo).md]]"
-- "[[Chiến lược Sản phẩm (Product).md]]"
+- "[[Copywriting (Viết Quảng cáo)]]"
+- "[[Chiến lược Sản phẩm (Product)]]"
 Related:
-- "[[Copywriting là gì.md]]"
-- "[[Viết Tiêu đề (Headline).md]]"
-- "[[Ba Cấp độ của Sản phẩm (Kotler).md]]"
+- "[[Copywriting là gì]]"
+- "[[Viết Tiêu đề (Headline)]]"
+- "[[Ba Cấp độ của Sản phẩm (Kotler)]]"
 Created: "2025-11-05"
 Updated: "2025-11-05"
-Source: "Copyhackers, "Marketing 101""
+Source: "Copyhackers, Marketing 101"
 ---
 
 # [[Lợi ích vs. Tính năng (Benefits vs. Features)]]

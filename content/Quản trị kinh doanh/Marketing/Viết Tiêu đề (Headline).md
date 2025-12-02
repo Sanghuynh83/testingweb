@@ -23,7 +23,7 @@ Related:
 - "[[SEO On-page.md]]"
 Created: "2025-11-06"
 Updated: "2025-11-06"
-Source: "David Ogilvy, "The Advertising Man", Copyhackers"
+Source: "David Ogilvy, The Advertising Man, Copyhackers"
 ---
 
 # [[Viết Tiêu đề (Headline)]]

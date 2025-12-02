@@ -1,34 +1,23 @@
 ---
 MOC: "false"
-Title: "Phân khúc Thị trường"
-Alias:
-- "Market Segmentation"
-- "Segmentation"
-Concept_Type:
-- "Process"
-- "Strategy"
-tags:
-- "Concept"---
-MOC: "false"
 Title: "Phân khúc Thị trường (Segmentation)"
 Alias:
-- "Market Segmentation"
-- "Segmentation"
-- "Phân khúc Thị trường"
+  - "Market Segmentation"
+  - "Segmentation"
 Concept_Type:
-- "Process"
-- "Strategy"
+  - "Process"
+  - "Strategy"
 tags:
-- "Concept"
-- "Quản_trị_Kinh_doanh"
-- "Marketing"
-- "Marketing_Chiến_lược_STP"
+  - "Concept"
+  - "Quản_trị_Kinh_doanh"
+  - "Marketing"
+  - "Marketing_Chiến_lược_STP"
 Up:
-- "[[Marketing Chiến lược (STP).md]]"
+  - "[[Marketing Chiến lược (STP)]]"
 Related:
-- "[[Lựa chọn Thị trường Mục tiêu (Targeting).md]]"
-- "[[Định vị Thương hiệu (Positioning).md]]"
-- "[[Mô hình Hành vi Người tiêu dùng (Hộp đen).md]]"
+  - "[[Lựa chọn Thị trường Mục tiêu (Targeting)]]"
+  - "[[Định vị Thương hiệu (Positioning)]]"
+  - "[[Mô hình Hành vi Người tiêu dùng (Hộp đen)]]"
 Created: "2025-10-30"
 Updated: "2025-10-30"
 Source: "Giáo trình Marketing Căn bản (Philip Kotler)"

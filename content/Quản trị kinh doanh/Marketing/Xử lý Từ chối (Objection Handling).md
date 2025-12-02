@@ -23,7 +23,7 @@ Related:
 - "[[Bằng chứng Xã hội (Social Proof).md]]"
 Created: "2025-11-06"
 Updated: "2025-11-06"
-Source: "Zig Ziglar, Brian Tracy, "Sales 101""
+Source: "Zig Ziglar, Brian Tracy, Sales 101"
 ---
 
 # [[Xử lý Từ chối (Objection Handling)]]

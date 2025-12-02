@@ -26,7 +26,7 @@ Related:
 - "[[Các yếu tố ảnh hưởng đến Hành vi Người tiêu dùng.md]]"
 Created: "2025-11-05"
 Updated: "2025-11-05"
-Source: "Robert Cialdini, "Influence: The Psychology of Persuasion""
+Source: "Robert Cialdini, Influence: The Psychology of Persuasion"
 ---
 
 # [[Bằng chứng Xã hội (Social Proof)]]

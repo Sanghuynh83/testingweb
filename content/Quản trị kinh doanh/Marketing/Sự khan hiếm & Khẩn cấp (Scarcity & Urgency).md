@@ -25,7 +25,7 @@ Related:
 - "[[Khuyến mãi (Sales Promotion).md]]"
 Created: "2025-11-06"
 Updated: "2025-11-06"
-Source: "Robert Cialdini, "Influence: The Psychology of Persuasion""
+Source: "Robert Cialdini, Influence: The Psychology of Persuasion"
 ---
 
 # [[Sự khan hiếm & Khẩn cấp (Scarcity & Urgency)]]

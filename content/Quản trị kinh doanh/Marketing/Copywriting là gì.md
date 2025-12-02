@@ -20,7 +20,7 @@ Related:
 - "[[Mô hình AIDA.md]]"
 Created: "2025-11-06"
 Updated: "2025-11-06"
-Source: "Copyhackers, "The Boron Letters" (Gary Halbert)"
+Source: "Copyhackers, The Boron Letters (Gary Halbert)"
 ---
 
 # [[Copywriting là gì]]
