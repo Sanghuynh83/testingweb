@@ -45,6 +45,10 @@ export const defaultContentPageLayout: PageLayout = {
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],
+  // Đã thêm phần afterBody này để hiển thị danh sách bài viết
+  afterBody: [
+    Component.HomeLists(),
+  ],
 }
 
 // components for pages that display lists of pages  (e.g. tags or folders)
