@@ -1,0 +1,15 @@
+filters:
+  and:
+    - file.inFolder("Quản trị kinh doanh")
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - MOC == "true"
+    order:
+      - file.name
+      - MOC
+    sort:
+      - property: MOC
+        direction: ASC
