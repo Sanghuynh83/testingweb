@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Quartz 4",
+    pageTitle: "Wiki Sang Huynh",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -16,6 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
+    // Thay thế bằng đường dẫn repo của bạn
     baseUrl: "sanghuynh83.github.io/testingweb",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
@@ -23,24 +24,26 @@ const config: QuartzConfig = {
       fontOrigin: "googleFonts",
       cdnCaching: true,
       typography: {
-        header: "Schibsted Grotesk",
-        body: "Source Sans Pro",
-        code: "IBM Plex Mono",
+        // Font tiêu đề: Dùng Sans-serif hiện đại, sạch sẽ
+        header: "Inter",
+        // Font nội dung: Dùng Serif (có chân) để tạo cảm giác "tri thức", dễ đọc
+        body: "Libre Baskerville",
+        code: "JetBrains Mono",
       },
       colors: {
         lightMode: {
-          light: "#faf8f8",
-          lightgray: "#e5e5e5",
+          light: "#faf8f5", // Màu giấy kem nhẹ (thay vì trắng toát #fff)
+          lightgray: "#e0dcd3",
           gray: "#b8b8b8",
           darkgray: "#4e4e4e",
           dark: "#2b2b2b",
-          secondary: "#284b63",
+          secondary: "#385a7c", // Màu xanh cổ vịt (sang hơn màu xanh dương mặc định)
           tertiary: "#84a59d",
           highlight: "rgba(143, 159, 169, 0.15)",
           textHighlight: "#fff23688",
         },
         darkMode: {
-          light: "#161618",
+          light: "#1a1919", // Màu đen than (thay vì đen kịt)
           lightgray: "#393639",
           gray: "#646464",
           darkgray: "#d4d4d4",
@@ -81,8 +84,8 @@ const config: QuartzConfig = {
       Plugin.FolderPage(),
       Plugin.TagPage(),
       Plugin.ContentIndex({
-        enableSiteMap: false,
-        enableRSS: false,
+        enableSiteMap: true,
+        enableRSS: true,
       }),
       Plugin.Assets(),
       Plugin.Static(),
