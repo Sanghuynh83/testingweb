@@ -25,7 +25,17 @@ type ComponentResources = {
   afterDOMLoaded: string[]
 }
 
-function getComponentResources(ctx: BuildCtx): ComponentResources {
+interface Options {
+  fontOrigin: "googleFonts" | "local"
+  externalScripts?: string[] // Added support for external scripts
+}
+
+const defaultOptions: Options = {
+  fontOrigin: "googleFonts",
+  externalScripts: [],
+}
+
+function getComponentResources(ctx: BuildCtx, opts: Options): ComponentResources {
   const allComponents: Set<QuartzComponent> = new Set()
   for (const emitter of ctx.cfg.plugins.emitters) {
     const components = emitter.getQuartzComponents?.(ctx) ?? []
@@ -76,7 +86,7 @@ async function joinScripts(scripts: string[]): Promise<string> {
   return res.code
 }
 
-function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentResources) {
+function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentResources, opts: Options) {
   const cfg = ctx.cfg.configuration
 
   // popovers
@@ -253,7 +263,7 @@ function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentReso
     `)
   }
 
-  if (cfg.enableSPA) {
+  if (ctx.cfg.configuration.enableSPA) {
     componentResources.afterDOMLoaded.push(spaRouterScript)
   } else {
     componentResources.afterDOMLoaded.push(`
@@ -263,17 +273,34 @@ function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentReso
       document.dispatchEvent(event)
     `)
   }
+
+  // Inject external scripts
+  if (opts?.externalScripts) {
+    for (const scriptSrc of opts.externalScripts) {
+      componentResources.afterDOMLoaded.push(`
+            const script = document.createElement('script');
+            script.src = "${scriptSrc}";
+            script.defer = true;
+            script.setAttribute("defer", "");
+            document.head.appendChild(script);
+        `)
+    }
+  }
 }
 
 // This emitter should not update the `resources` parameter. If it does, partial
 // rebuilds may not work as expected.
-export const ComponentResources: QuartzEmitterPlugin = () => {
+export const ComponentResources: QuartzEmitterPlugin<Partial<Options>> = (userOpts) => {
+  const opts = { ...defaultOptions, ...userOpts }
   return {
     name: "ComponentResources",
+    getQuartzComponents(ctx) {
+      return []
+    },
     async *emit(ctx, _content, _resources) {
       const cfg = ctx.cfg.configuration
       // component specific scripts and styles
-      const componentResources = getComponentResources(ctx)
+      const componentResources = getComponentResources(ctx, opts) // Pass opts here
       let googleFontsStyleSheet = ""
       if (cfg.theme.fontOrigin === "local") {
         // let the user do it themselves in css
@@ -321,7 +348,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
       // important that this goes *after* component scripts
       // as the "nav" event gets triggered here and we should make sure
       // that everyone else had the chance to register a listener for it
-      addGlobalPageResources(ctx, componentResources)
+      addGlobalPageResources(ctx, componentResources, opts) // Pass opts here
 
       const stylesheet = joinStyles(
         ctx.cfg.configuration.theme,
@@ -368,6 +395,6 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
         content: postscript,
       })
     },
-    async *partialEmit() {},
+    async *partialEmit() { },
   }
 }

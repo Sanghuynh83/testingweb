@@ -3,6 +3,7 @@ import TagContent from "./pages/TagContent"
 import FolderContent from "./pages/FolderContent"
 import NotFound from "./pages/404"
 import ArticleTitle from "./ArticleTitle"
+import FloatingNodeDock from "./FloatingNodeDock"
 import Darkmode from "./Darkmode"
 import ReaderMode from "./ReaderMode"
 import Head from "./Head"
@@ -52,4 +53,5 @@ export {
   Flex,
   ConditionalRender,
   HomeLists, // <--- Đã thêm dòng này
+  FloatingNodeDock,
 }

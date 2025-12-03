@@ -5,7 +5,7 @@ import * as Component from "./quartz/components"
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [],
+  afterBody: [Component.FloatingNodeDock()],
   footer: Component.Footer({
     links: {
       GitHub: "https://github.com/jackyzha0/quartz",
@@ -45,9 +45,11 @@ export const defaultContentPageLayout: PageLayout = {
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],
-  // Đã thêm phần afterBody này để hiển thị danh sách bài viết
   afterBody: [
-    Component.HomeLists(),
+    Component.ConditionalRender({
+      component: Component.HomeLists(),
+      condition: (page) => page.fileData.slug === "index",
+    }),
   ],
 }
 
@@ -68,5 +70,10 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.Explorer(),
   ],
-  right: [],
+  right: [
+    Component.Graph(),
+    Component.DesktopOnly(Component.TableOfContents()),
+    Component.Backlinks(),
+  ],
+  afterBody: [],
 }

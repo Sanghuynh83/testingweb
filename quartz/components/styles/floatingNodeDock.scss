@@ -1,0 +1,63 @@
+/* Sử dụng font Inter cho toàn bộ trang */
+/* body {
+    font-family: 'Inter', sans-serif;
+    min-height: 200vh; 
+} */
+
+/* CSS cho hiệu ứng chuyển động mượt mà */
+.node {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Thêm một chút hiệu ứng "thở" cho nút chính */
+.main-node-animate {
+    animation: pulse-light 2s infinite;
+}
+
+@keyframes pulse-light {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px 0px rgba(59, 130, 246, 0.5);
+        /* blue-500 */
+    }
+
+    50% {
+        box-shadow: 0 0 25px 8px rgba(59, 130, 246, 0.8);
+        /* blue-500 */
+    }
+}
+
+/* Lớp trợ giúp để ẩn/hiện dựa trên JS */
+.hidden-node {
+    transform: scale(0);
+    opacity: 0;
+    width: 0px;
+    /* Đảm bảo nó không chiếm không gian */
+    height: 0px;
+    margin: 0px !important;
+    /* Đè margin của tailwind */
+    overflow: hidden;
+    /* Ẩn nội dung nếu có */
+}
+
+/* Kích thước nút phụ */
+.aux-node {
+    width: 50px;
+    /* Nút phụ nhỏ hơn */
+    height: 50px;
+    font-size: 0.7rem;
+    /* Chữ nhỏ hơn */
+    line-height: 1;
+    /* Căn giữa chữ */
+}
+
+/* Nút chính */
+#main-node-element {
+    width: 70px;
+    /* Giữ kích thước nút chính ổn định và nổi bật */
+    height: 70px;
+    font-size: 0.85rem;
+    margin: 0 16px;
+    /* Khoảng cách giữa nút chính và cụm nút phụ */
+}
