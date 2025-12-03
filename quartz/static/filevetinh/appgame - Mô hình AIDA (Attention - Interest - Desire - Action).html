@@ -1,0 +1,664 @@
+---
+Up: "[[Mô hình AIDA (Attention - Interest - Desire - Action)]] "
+---
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Synthēsis Prototype</title>
+
+<!-- Tải Tailwind CSS -->
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+/* CSS bổ sung cho giao diện */
+
+body {
+
+font-family: 'Inter', sans-serif;
+
+}
+
+/* Kiểu của các đường liên kết (cạnh) trong SVG */
+
+.link-line {
+
+stroke: #3b82f6; /* Màu xanh blue-500 */
+
+stroke-width: 3;
+
+marker-end: url(#arrowhead);
+
+}
+
+/* Kiểu của node khi được chọn để liên kết */
+
+.linking {
+
+outline: 3px solid #f59e0b; /* Màu vàng amber-500 */
+
+outline-offset: 2px;
+
+}
+
+</style>
+
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+  
+
+<div class="w-full max-w-4xl">
+
+<!-- TIÊU ĐỀ -->
+
+<header class="text-center mb-6">
+
+<h1 class="text-4xl font-bold text-blue-400">Synthēsis</h1>
+
+<h2 class="text-xl text-gray-300 mt-2">Thách thức: Tái tạo "Mô hình AIDA"</h2>
+
+</header>
+
+  
+
+<!-- KHU VỰC GAME -->
+
+<main class="space-y-6">
+
+  
+
+<!-- TẦNG 1: THỰC THỂ (Entities) -->
+
+<section class="bg-gray-800 p-4 rounded-lg shadow-lg">
+
+<h3 class="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-3">Tầng 1: Kho "Thực Thể" (Chọn các nguyên tử)</h3>
+
+<div id="t1-pool" class="flex flex-wrap gap-3 justify-center">
+
+<!-- Các "Thực Thể" (node) sẽ được JS chèn vào đây -->
+
+</div>
+
+</section>
+
+  
+
+<!-- KHU VỰC LÀM VIỆC (Workspace) & TẦNG 2 (Links) -->
+
+<section class="bg-gray-800 p-4 rounded-lg shadow-lg">
+
+<h3 class="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-3">Không gian làm việc (Nối "Động Lực")</h3>
+
+<p class="text-sm text-gray-400 mb-4">Click vào một "Thực Thể" trong kho để đưa vào đây. Sau đó, click vào 2 "Thực Thể" trong này để tạo liên kết (Tầng 2).</p>
+
+<!-- Container cho workspace và SVG canvas -->
+
+<div id="workspace-container" class="relative w-full h-96 bg-gray-900/50 border-2 border-dashed border-gray-700 rounded-lg">
+
+<!-- SVG để vẽ các đường liên kết (Tầng 2) -->
+
+<svg id="svg-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none">
+
+<!-- Định nghĩa đầu mũi tên -->
+
+<defs>
+
+<marker id="arrowhead" markerWidth="10" markerHeight="7"
+
+refX="10" refY="3.5" orient="auto" fill="#3b82f6">
+
+<polygon points="0 0, 10 3.5, 0 7" />
+
+</marker>
+
+</defs>
+
+</svg>
+
+  
+
+<!-- Workspace để chứa các node (Tầng 1) đã chọn -->
+
+<div id="workspace" class="relative w-full h-full p-4">
+
+<!-- Các node đã chọn sẽ được JS chèn vào đây -->
+
+</div>
+
+</div>
+
+</section>
+
+  
+
+<!-- TẦNG 3: HỆ THỐNG (Synthesis) -->
+
+<section class="text-center space-y-4">
+
+<button id="check-synthesis-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300 text-lg">
+
+Kích hoạt "Hệ Thống" (Tầng 3)
+
+</button>
+
+<button id="reset-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
+
+Làm lại
+
+</button>
+
+<!-- Khu vực thông báo kết quả -->
+
+<div id="message-area" class="h-auto min-h-[2.5rem] text-xl font-medium"></div>
+
+</section>
+
+  
+
+</main>
+
+</div>
+
+  
+
+<script>
+
+// --- CẤU TRÚC DỮ LIỆU ---
+
+  
+
+// (Blueprint) Cấu trúc đúng của mô hình AIDA mà người chơi cần tái tạo
+
+const blueprint = {
+
+id: 'AIDA',
+
+nodes: ['Attention', 'Interest', 'Desire', 'Action'],
+
+links: [
+
+{ from: 'Attention', to: 'Interest' },
+
+{ from: 'Interest', to: 'Desire' },
+
+{ from: 'Desire', to: 'Action' }
+
+]
+
+};
+
+  
+
+// Các "Thực Thể" (Tầng 1) có sẵn trong kho (bao gồm cả các lựa chọn sai)
+
+const allEntitiesT1 = [
+
+'Interest', 'Money', 'Attention', 'Product', 'Desire', 'Time', 'Action'
+
+];
+
+  
+
+// Trạng thái hiện tại của người chơi
+
+let playerBuild = {
+
+nodes: [],
+
+links: []
+
+};
+
+  
+
+// Trạng thái của việc tạo liên kết (Tầng 2)
+
+// null: chưa bắt đầu, hoặc tên của node bắt đầu
+
+let linkState = {
+
+startNode: null,
+
+startNodeElement: null
+
+};
+
+  
+
+// Lấy các DOM element
+
+const t1PoolEl = document.getElementById('t1-pool');
+
+const workspaceEl = document.getElementById('workspace');
+
+const svgCanvasEl = document.getElementById('svg-canvas');
+
+const checkBtn = document.getElementById('check-synthesis-btn');
+
+const resetBtn = document.getElementById('reset-btn');
+
+const messageAreaEl = document.getElementById('message-area');
+
+  
+
+// --- HÀM KHỞI TẠO GAME ---
+
+  
+
+function initGame() {
+
+// Reset trạng thái
+
+playerBuild = { nodes: [], links: [] };
+
+linkState = { startNode: null, startNodeElement: null };
+
+// Xóa các elements cũ
+
+t1PoolEl.innerHTML = '';
+
+workspaceEl.innerHTML = '';
+
+svgCanvasEl.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#3b82f6"><polygon points="0 0, 10 3.5, 0 7" /></marker></defs>';
+
+messageAreaEl.textContent = '';
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium';
+
+  
+
+// Tạo các "Thực Thể" (Tầng 1) trong kho
+
+allEntitiesT1.forEach(entityName => {
+
+const nodeEl = createNodeElement(entityName, 'pool');
+
+nodeEl.addEventListener('click', () => handleT1PoolClick(entityName, nodeEl));
+
+t1PoolEl.appendChild(nodeEl);
+
+});
+
+}
+
+  
+
+// --- HÀM TẠO ELEMENT (NODE) ---
+
+  
+
+function createNodeElement(name, type = 'pool') {
+
+const el = document.createElement('div');
+
+el.id = `${type}-node-${name}`;
+
+el.textContent = name;
+
+el.className = 'node-item cursor-pointer bg-gray-700 hover:bg-gray-600 border-2 border-gray-600 hover:border-blue-500 rounded-lg px-4 py-3 font-medium transition duration-200 shadow-md';
+
+if (type === 'workspace') {
+
+el.className += ' absolute'; // Workspace node có thể di chuyển (prototype này đặt cố định)
+
+// Phân bố vị trí các node trong workspace
+
+const pos = getWorkspaceNodePosition(name);
+
+el.style.left = `${pos.x}%`;
+
+el.style.top = `${pos.y}%`;
+
+el.style.transform = 'translate(-50%, -50%)'; // Căn giữa node
+
+el.style.width = '120px'; // Kích thước cố định cho dễ
+
+el.style.textAlign = 'center';
+
+}
+
+return el;
+
+}
+
+  
+
+// Hàm định vị node (để demo cho đẹp)
+
+function getWorkspaceNodePosition(name) {
+
+switch(name) {
+
+case 'Attention': return { x: 25, y: 20 };
+
+case 'Interest': return { x: 75, y: 20 };
+
+case 'Desire': return { x: 25, y: 70 };
+
+case 'Action': return { x: 75, y: 70 };
+
+case 'Money': return { x: 50, y: 45 };
+
+case 'Product': return { x: 50, y: 90 };
+
+case 'Time': return { x: 50, y: 5 };
+
+default: return { x: 50, y: 50 };
+
+}
+
+}
+
+  
+
+// --- HÀM XỬ LÝ LOGIC ---
+
+  
+
+// 1. Click vào node trong Kho (Tầng 1)
+
+function handleT1PoolClick(entityName, poolNodeEl) {
+
+// Thêm vào cấu trúc của người chơi
+
+if (!playerBuild.nodes.includes(entityName)) {
+
+playerBuild.nodes.push(entityName);
+
+// Ẩn node khỏi kho
+
+poolNodeEl.style.display = 'none';
+
+// Tạo node mới trong workspace
+
+const workspaceNodeEl = createNodeElement(entityName, 'workspace');
+
+workspaceNodeEl.addEventListener('click', () => handleWorkspaceNodeClick(entityName, workspaceNodeEl));
+
+workspaceEl.appendChild(workspaceNodeEl);
+
+}
+
+}
+
+  
+
+// 2. Click vào node trong Workspace (Tầng 2 - "Động Lực")
+
+function handleWorkspaceNodeClick(entityName, nodeEl) {
+
+messageAreaEl.textContent = ''; // Xóa thông báo cũ
+
+  
+
+if (linkState.startNode === null) {
+
+// Đây là node bắt đầu của 1 liên kết
+
+linkState.startNode = entityName;
+
+linkState.startNodeElement = nodeEl;
+
+nodeEl.classList.add('linking'); // Highlight node
+
+} else {
+
+// Đây là node kết thúc của 1 liên kết
+
+if (linkState.startNode === entityName) {
+
+// Click lại chính nó -> Hủy liên kết
+
+linkState.startNode = null;
+
+linkState.startNodeElement.classList.remove('linking');
+
+linkState.startNodeElement = null;
+
+return;
+
+}
+
+  
+
+// Tạo liên kết mới
+
+const newLink = { from: linkState.startNode, to: entityName };
+
+// Kiểm tra xem liên kết đã tồn tại chưa
+
+const linkExists = playerBuild.links.some(
+
+link => (link.from === newLink.from && link.to === newLink.to)
+
+);
+
+  
+
+if (!linkExists) {
+
+playerBuild.links.push(newLink);
+
+renderLinks();
+
+}
+
+  
+
+// Reset trạng thái link
+
+linkState.startNodeElement.classList.remove('linking');
+
+linkState.startNode = null;
+
+linkState.startNodeElement = null;
+
+}
+
+}
+
+  
+
+// 3. Vẽ lại các đường liên kết (Tầng 2) trên SVG
+
+function renderLinks() {
+
+// Xóa các line cũ, giữ lại <defs>
+
+svgCanvasEl.innerHTML = svgCanvasEl.querySelector('defs').outerHTML;
+
+  
+
+playerBuild.links.forEach(link => {
+
+const fromEl = document.getElementById(`workspace-node-${link.from}`);
+
+const toEl = document.getElementById(`workspace-node-${link.to}`);
+
+  
+
+if (fromEl && toEl) {
+
+// Lấy vị trí trung tâm của mỗi node
+
+const fromX = fromEl.offsetLeft + fromEl.offsetWidth / 2;
+
+const fromY = fromEl.offsetTop + fromEl.offsetHeight / 2;
+
+const toX = toEl.offsetLeft + toEl.offsetWidth / 2;
+
+const toY = toEl.offsetTop + toEl.offsetHeight / 2;
+
+  
+
+// Tạo line SVG
+
+const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+
+line.setAttribute('x1', fromX);
+
+line.setAttribute('y1', fromY);
+
+line.setAttribute('x2', toX);
+
+line.setAttribute('y2', toY);
+
+line.setAttribute('class', 'link-line');
+
+svgCanvasEl.appendChild(line);
+
+}
+
+});
+
+}
+
+  
+
+// 4. Kiểm tra "Hệ Thống" (Tầng 3)
+
+function checkSynthesis() {
+
+// Helper để so sánh 2 set (mảng không quan tâm thứ tự)
+
+const compareSets = (arrA, arrB) => {
+
+if (arrA.length !== arrB.length) return false;
+
+const setB = new Set(arrB);
+
+return arrA.every(item => setB.has(item));
+
+};
+
+  
+
+// Chuyển mảng links sang mảng string để so sánh (vì object khó so sánh)
+
+const playerLinkSet = new Set(playerBuild.links.map(l => `${l.from}->${l.to}`));
+
+const blueprintLinkSet = new Set(blueprint.links.map(l => `${l.from}->${l.to}`));
+
+const playerNodeSet = new Set(playerBuild.nodes);
+
+const blueprintNodeSet = new Set(blueprint.nodes);
+
+  
+
+// --- KIỂM TRA TẦNG 1: THỰC THỂ ---
+
+let incorrectNodes = playerBuild.nodes.filter(node => !blueprintNodeSet.has(node));
+
+let missingNodes = blueprint.nodes.filter(node => !playerNodeSet.has(node));
+
+  
+
+if (incorrectNodes.length > 0) {
+
+messageAreaEl.textContent = `THẤT BẠI: "Thực Thể" [${incorrectNodes.join(', ')}] không thuộc về hệ thống này.`;
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-red-400';
+
+return;
+
+}
+
+  
+
+if (missingNodes.length > 0) {
+
+messageAreaEl.textContent = `THẤT BẠI: Vẫn còn thiếu [${missingNodes.length}] "Thực Thể" cần thiết.`;
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-red-400';
+
+return;
+
+}
+
+  
+
+// Nếu đến đây, Tầng 1 (Nodes) đã đúng.
+
+// --- KIỂM TRA TẦNG 2: ĐỘNG LỰC (LINKS) ---
+
+let incorrectLinks = [...playerLinkSet].filter(link => !blueprintLinkSet.has(link));
+
+let missingLinks = [...blueprintLinkSet].filter(link => !playerLinkSet.has(link));
+
+  
+
+if (incorrectLinks.length > 0) {
+
+messageAreaEl.textContent = `THẤT BẠI: Liên kết [${incorrectLinks[0]}] không chính xác.`;
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-red-400';
+
+return;
+
+}
+
+  
+
+if (missingLinks.length > 0) {
+
+messageAreaEl.textContent = `THẤT BẠI: Cấu trúc Tầng 2 chưa hoàn chỉnh, thiếu [${missingLinks.length}] liên kết.`;
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-red-400';
+
+return;
+
+}
+
+  
+
+// --- THÀNH CÔNG ---
+
+if (incorrectNodes.length === 0 && missingNodes.length === 0 && incorrectLinks.length === 0 && missingLinks.length === 0) {
+
+messageAreaEl.textContent = 'KÍCH HOẠT THÀNH CÔNG! Hệ thống "AIDA" đã hoàn tất.';
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-green-400';
+
+} else {
+
+// Trường hợp dự phòng, mặc dù logic trên đã cover
+
+messageAreaEl.textContent = 'THẤT BẠI. Cấu trúc "Hệ Thống" chưa chính xác.';
+
+messageAreaEl.className = 'h-auto min-h-[2.5rem] text-xl font-medium text-red-400';
+
+}
+
+}
+
+  
+
+// --- GẮN SỰ KIỆN ---
+
+checkBtn.addEventListener('click', checkSynthesis);
+
+resetBtn.addEventListener('click', initGame);
+
+  
+
+// Khởi động game
+
+document.addEventListener('DOMContentLoaded', initGame);
+
+  
+
+</script>
+
+</body>
+
+</html>

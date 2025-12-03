@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- TIÊU ĐỀ ĐÃ ĐƯỢC CẬP NHẬT -->
+    <title>AI Quiz: Copywriting vs Content Writing</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Sử dụng font Inter cho toàn bộ trang */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* gray-50 */
+        }
+        /* Thêm font Inter từ Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* ... (Các style nút và tab giữ nguyên) ... */
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.9; }
+        .option-btn.correct {
+            background-color: #111827; /* gray-900 */
+            border-color: #111827; /* gray-900 */
+            color: #ffffff; /* white */
+            font-weight: 600;
+        }
+        .option-btn.incorrect {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #e5e7eb; /* gray-200 */
+            color: #6b7280; /* gray-500 */
+            text-decoration: line-through;
+        }
+        .option-btn:not(:disabled):hover {
+            background-color: #fcfcfd; /* white-ish */
+            border-color: #111827; /* gray-900 */
+        }
+        .primary-btn {
+            background-color: #111827; /* gray-900 */
+            color: #ffffff; /* white */
+            transition: all 0.2s ease-in-out;
+        }
+        .primary-btn:hover:not(:disabled) { background-color: #374151; /* gray-700 */ }
+        .primary-btn:disabled {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #9ca3af; /* gray-400 */
+            cursor: not-allowed;
+        }
+        .level-tab {
+            border: 2px solid #e5e7eb; /* gray-200 */
+            color: #6b7280; /* gray-500 */
+            transition: all 0.2s ease-in-out;
+        }
+        .level-tab:hover:not(.active-tab) {
+            border-color: #d1d5db; /* gray-300 */
+            color: #374151; /* gray-700 */
+        }
+        .level-tab.active-tab {
+            background-color: #111827; /* gray-900 */
+            border-color: #111827; /* gray-900 */
+            color: #ffffff; /* white */
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .spinning { animation: spin 1s linear infinite; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .view-layer {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- 
+      Card chính của ứng dụng
+      (id="main-card" và transition: height đã có)
+    -->
+    <div id="main-card" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl relative" style="min-height: 550px; overflow: hidden; transition: height 0.3s ease-in-out;">
+        
+        <!-- ĐIỂM NEO NHẬN THỨC (Ban đầu bị ẩn) -->
+        <div id="anchor-box" class="absolute top-6 right-6 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-md opacity-0 scale-90 pointer-events-none view-layer z-20">
+            <span id="anchor-text">Cấp độ: Biết</span>
+        </div>
+
+        <!-- LỚP 1: CHỌN CẤP ĐỘ -->
+        <div id="generator-container" class="absolute top-0 left-0 w-full p-6 sm:p-10 bg-white opacity-100 scale-100 view-layer z-10">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Chế độ Luyện tập</h1>
+            <p class="text-base text-gray-600 mb-6">Chọn một cấp độ nhận thức để bắt đầu.</p>
+            
+            <div id="level-tabs" class="grid grid-cols-3 gap-3 mb-6">
+                <button class="level-tab p-4 rounded-lg font-medium" data-level="Biết">
+                    Biết
+                    <span class="block text-xs font-normal opacity-70">Nhớ lại, Định nghĩa</span>
+                </button>
+                <button class="level-tab p-4 rounded-lg font-medium" data-level="Hiểu">
+                    Hiểu
+                    <span class="block text-xs font-normal opacity-70">So sánh, Giải thích</span>
+                </button>
+                <button class="level-tab p-4 rounded-lg font-medium" data-level="Ứng dụng">
+                    Ứng dụng
+                    <span class="block text-xs font-normal opacity-70">Áp dụng, Ví dụ</span>
+                </button>
+            </div>
+
+            <button id="generate-btn" class="primary-btn w-full py-4 rounded-lg font-semibold transition-all shadow-md text-lg inline-flex items-center justify-center gap-3" disabled>
+                <svg id="loading-spinner" class="spinning h-5 w-5 text-white" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="generate-btn-text">Chọn cấp độ để bắt đầu</span>
+            </button>
+            <p id="error-message" class="text-red-600 mt-4 h-5 text-center"></p>
+        </div>
+
+        <!-- LỚP 2: QUIZ (Ban đầu bị ẩn) -->
+        <div id="quiz-container" class="absolute top-0 left-0 w-full p-6 sm:p-10 bg-white opacity-0 scale-95 pointer-events-none view-layer z-10">
+            <div id="question-area" class="mb-6 pt-10"> 
+                <p id="question-counter" class="text-sm font-medium text-gray-500 mb-2"></p>
+                <p id="question-text" class="text-xl font-semibold text-gray-900"></p>
+            </div>
+            <div id="options-container" class="grid grid-cols-1 gap-4"></div>
+            <div id="feedback-area" class="mt-5">
+                <p id="feedback-text" class="text-lg font-medium text-center h-6"></p>
+            </div>
+            <button id="next-btn" class="mt-6 w-full primary-btn p-3 rounded-lg font-semibold transition-all shadow-md" style="display: none;">
+                Câu tiếp theo
+            </button>
+        </div>
+
+        <!-- LỚP 3: KẾT QUẢ (Ban đầu bị ẩn) -->
+        <div id="results-container" class="absolute top-0 left-0 w-full p-6 sm:p-10 bg-white opacity-0 scale-95 pointer-events-none view-layer z-10 text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pt-10">Hoàn thành!</h2> 
+            <p id="score-text" class="text-4xl font-bold text-gray-900 mb-8"></p>
+            <button id="restart-btn" class="primary-btn w-full sm:w-auto px-10 py-4 rounded-lg font-semibold transition-all shadow-md text-lg">
+                Chọn cấp độ khác
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // -- VĂN BẢN NGUỒN ĐÃ ĐƯỢC CẬP NHẬT --
+        const CONTEXT_TEXT = `
+MOC: "false"
+Title: "Phân biệt Copywriting và Content Writing"
+Alias:
+- "Copywriting vs Content Writing"
+Concept_Type:
+- "Framework"
+- "Concept"
+tags:
+- "Concept"
+- "Quản_trị_Kinh_doanh"
+- "Marketing"
+- "Chiến_lược_Chiêu_thị"
+- "Copywriting"
+- "Content_Marketing"
+Up:
+- "[[MOC - Viết Quảng cáo (Copywriting)]]"
+- "[[MOC - Content Marketing]]"
+Related:
+- "[[Copywriting là gì]]"
+- "[[Content Marketing là gì]]"
+- "[[Nội dung theo Phễu (TOFU, MOFU, BOFU)]]"
+Created: "2025-11-06"
+Updated: "2025-11-06"
+Source: "Copyhackers, Content Marketing Institute (CMI)"
+---
+
+# [[Phân biệt Copywriting và Content Writing]]
+
+## 1. Định nghĩa
+
+**Copywriting** và **Content Writing** (Viết Nội dung) là hai kỹ năng cốt lõi trong marketing, nhưng chúng có mục tiêu và cách tiếp cận *khác nhau*.
+
+* **Copywriting (Viết Quảng cáo):** Thúc đẩy *hành động* (Action).
+* **Content Writing (Viết Nội dung):** Xây dựng *sự gắn kết & lòng tin* (Engagement & Trust).
+
+Một cách ví von:
+* **Content Writing (Marketing Hút):** Là [[Inbound Marketing]]. Bạn tạo ra một nhà hàng (blog, video) có không khí tuyệt vời, đồ ăn ngon (giá trị), thu hút khách hàng *tự tìm đến*.
+* **Copywriting (Marketing Thúc đẩy):** Là người phục vụ (salesperson) đến bàn và nói: "Món đặc biệt hôm nay của chúng tôi là [Sản phẩm], anh chị có muốn dùng thử không?".
+
+## 2. Bảng So sánh
+
+| Yếu tố                | **Content Writing (Viết Nội dung)**                                                    | **Copywriting (Viết Quảng cáo)**                                      |                                                                 |                                                                 |                                             |
+| :-------------------- | :------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------- |
+| **Mục tiêu chính**    | Giáo dục (Educate), Thông tin (Inform), Giải trí (Entertain), Xây dựng lòng tin.       | Thuyết phục (Persuade), Bán hàng (Sell), Thúc đẩy Hành động (Action). |                                                                m|                                                                 |                            _               |
+| **Tư duy**            | "Hãy *tin* tôi." (Build Trust)                                                         | "Hãy *mua* ngay!" (Drive Action)                                      |        _                                                      |                                                                 |                                             |
+| **Vị trí trong Phễu** | [[Nội dung theo Phễu (TOFU, MOFU, BOFU)                                                | TOFU (Đầu phễu)]] & [[Nội dung theo Phễu (TOFU, MOFU, BOFU)           | MOFU (Giữa phễu)]].                                             | [[Nội dung theo Phễu (TOFU, MOFU, BOFU)                         | BOFU (Đáy phễu)]] (và các điểm chuyển đổi). |
+| **Đo lường (Metric)** | Traffic, Thời gian trên trang (Time on Page), Lượt Tương tác (Engagement), [[SEO là gì | Thứ hạng SEO]].                                                       | Tỷ lệ Chuyển đổi (Conversion Rate), [[PPC (Pay-Per-Click) là gì | CTR]], Doanh số (Sales), [[Lead Magnet (Mồi thu hút Khách hàng) | Leads]].  _                              |
+| **Ví dụ**             | Bài viết Blog, Ebook, Whitepaper, [[MOC - Social Media Marketing                       | Bài đăng Social Media]], Kịch bản video.                              | Mẫu [[Quảng cáo (Advertising)                                   | Quảng cáo]], Landing Page, Sales Page, [[Email Marketing là gì  | Email Bán hàng]], Nút CTA.                  |
+
+## 3. Mối quan hệ
+Copywriting và Content Writing không phải là đối thủ, chúng là **đồng đội**.
+* [[Content Marketing là gì|Content Marketing]] (Content Writing) thu hút và làm ấm (warm up) khách hàng tiềm năng.
+* [[Copywriting là gì|Copywriting]] chuyển đổi (convert) những khách hàng tiềm năng đó thành khách hàng trả tiền.
+        `;
+
+        // -- CẤU HÌNH API GEMINI (ĐÃ CẬP NHẬT) --
+        const API_KEY = "AIzaSyCbIqgzMbiZyk8nlVCGp37n1iIwg9w_D-0"; // Để trống
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`;
+        
+        const JSON_SCHEMA = {
+            "type": "ARRAY",
+            "maxItems": 10, "minItems": 10,
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "question": { "type": "STRING" },
+                    "options": {
+                        "type": "ARRAY", "items": { "type": "STRING" },
+                        "minItems": 4, "maxItems": 4
+                    },
+                    "answer": { "type": "STRING" }
+                },
+                "required": ["question", "options", "answer"]
+            }
+        };
+
+        // -- LẤY CÁC PHẦN TỬ DOM --
+        const mainCard = document.getElementById('main-card');
+        const anchorBox = document.getElementById('anchor-box');
+        const anchorText = document.getElementById('anchor-text');
+        
+        const generatorContainer = document.getElementById('generator-container');
+        const levelTabs = document.querySelectorAll('.level-tab');
+        const generateBtn = document.getElementById('generate-btn');
+        const generateBtnText = document.getElementById('generate-btn-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorMessage = document.getElementById('error-message');
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const questionText = document.getElementById('question-text');
+        const questionCounter = document.getElementById('question-counter');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        
+        const resultsContainer = document.getElementById('results-container');
+        const scoreText = document.getElementById('score-text');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // -- BIẾN TRẠNG THÁI ỨNG DỤNG --
+        let quizData = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+        let selectedLevel = null; 
+
+        // Hàm điều chỉnh chiều cao thẻ chính
+        function adjustCardHeight(targetLayer) {
+            if (mainCard && targetLayer) {
+                // Thêm một chút trễ để đảm bảo DOM đã render xong
+                setTimeout(() => {
+                    const height = targetLayer.scrollHeight;
+                    mainCard.style.height = `${Math.max(height, 550)}px`;
+                }, 50); // Thêm 50ms trễ
+            }
+        }
+        adjustCardHeight(generatorContainer);
+
+
+        // -- HÀM XỬ LÝ API VỚI EXPONENTIAL BACKOFF --
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    // Log lỗi không phải 429 (rate limit) để gỡ lỗi
+                    if (response.status !== 429 && retries > 0) {
+                        console.warn(`Lỗi API (không phải 429): ${response.status}`, await response.text());
+                    }
+                    
+                    if (response.status === 429 && retries > 0) {
+                        // Đây là retry backoff, không cần log ra console
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                    }
+                    throw new Error(`Lỗi API: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            } catch (error) { 
+                // Chỉ log lỗi cuối cùng, không phải các lần retry
+                if (retries === 0) {
+                    console.error("Lỗi fetch sau khi đã thử lại:", error); 
+                }
+                throw error; 
+            }
+        }
+
+        // -- HÀM GỌI AI ĐỂ TẠO QUIZ --
+        async function generateQuiz() {
+            if (!selectedLevel) return;
+            setLoading(true);
+            errorMessage.textContent = '';
+            
+            const levelDescriptions = {
+                "Biết": "Cấp độ 'Biết': Các câu hỏi tập trung vào việc nhớ lại thông tin, định nghĩa, và sự kiện đã nêu. (Ví dụ: 'Copywriting là gì?', 'Mục tiêu chính của Content Writing là gì?').",
+                "Hiểu": "Cấp độ 'Hiểu': Các câu hỏi tập trung vào việc giải thích, so sánh, và diễn giải ý nghĩa. (Ví dụ: 'Sự khác biệt chính giữa Copywriting và Content Writing là gì?', 'Tại sao Content Writing lại quan trọng cho TOFU?').",
+                "Ứng dụng": "Cấp độ 'Ứng dụng': Các câu hỏi tập trung vào việc áp dụng kiến thức vào một tình huống mới hoặc ví dụ cụ thể. (Ví dụ: 'Một Landing Page được coi là ví dụ của loại hình viết nào?', 'Để xây dựng lòng tin, bạn nên dùng...')."
+            };
+            const levelDescription = levelDescriptions[selectedLevel];
+            const systemPrompt = "Bạn là một trợ lý giáo dục, chuyên tạo ra 10 câu hỏi trắc nghiệm phức tạp và sâu sắc để kiểm tra hiểu biết. Đảm bảo đáp án đúng phải nằm trong danh sách 4 lựa chọn.";
+            const userQuery = `Dựa trên văn bản sau đây, hãy tạo chính xác 10 câu hỏi trắc nghiệm.
+Tất cả 10 câu hỏi PHẢI tuân theo cấp độ nhận thức sau: ${levelDescription}
+Văn bản:
+${CONTEXT_TEXT}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json", 
+                    responseSchema: JSON_SCHEMA,
+                    temperature: 0.7 
+                }
+            };
+
+            try {
+                const result = await fetchWithBackoff(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    quizData = JSON.parse(jsonText); 
+                    // Lọc kỹ hơn: đảm bảo câu hỏi, lựa chọn và câu trả lời đều tồn tại VÀ câu trả lời nằm trong các lựa chọn
+                    quizData = quizData.filter(q => 
+                        q.question && 
+                        q.options && Array.isArray(q.options) && q.options.length === 4 && 
+                        q.answer && 
+                        q.options.includes(q.answer)
+                    );
+                    
+                    if (quizData.length < 5) { // Cần ít nhất 5 câu hỏi hợp lệ
+                        console.warn("AI trả về không đủ câu hỏi hợp lệ:", quizData);
+                        throw new Error("AI không tạo đủ câu hỏi hợp lệ.");
+                    }
+                    
+                    startQuizAnimation();
+                } else {
+                    console.error("Phản hồi từ AI không hợp lệ hoặc thiếu nội dung:", result);
+                    throw new Error("Phản hồi từ AI không hợp lệ.");
+                }
+
+            } catch (error) {
+                console.error("Không thể tạo quiz:", error); 
+                errorMessage.textContent = "Không thể tạo câu hỏi. Vui lòng thử lại.";
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // -- HÀM XỬ LÝ TRẠNG THÁI LOADING --
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateBtn.disabled = true;
+                loadingSpinner.style.display = 'inline-block';
+                generateBtnText.textContent = 'AI đang tạo câu hỏi...';
+                levelTabs.forEach(tab => tab.disabled = true);
+            } else {
+                // Chỉ bật nút nếu một cấp độ đã được chọn
+                generateBtn.disabled = !selectedLevel; 
+                loadingSpinner.style.display = 'none';
+                generateBtnText.textContent = selectedLevel ? `Tạo 10 câu hỏi (Cấp độ: ${selectedLevel})` : 'Chọn cấp độ để bắt đầu';
+                levelTabs.forEach(tab => tab.disabled = false);
+            }
+        }
+
+        // -- CÁC HÀM QUẢN LÝ ANIMATION VÀ QUIZ --
+
+        function startQuizAnimation() {
+            anchorText.textContent = `Cấp độ: ${selectedLevel}`;
+            // Đảm bảo anchorBox hiển thị
+            anchorBox.style.opacity = 1;
+            anchorBox.style.transform = 'scale(1)';
+            anchorBox.style.pointerEvents = 'auto';
+
+            // Ẩn generator
+            generatorContainer.style.opacity = 0;
+            generatorContainer.style.transform = 'scale(0.95)';
+            generatorContainer.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                // Hiện quiz
+                quizContainer.style.opacity = 1;
+                quizContainer.style.transform = 'scale(1)';
+                quizContainer.style.pointerEvents = 'auto';
+                startQuiz(); // Hàm này sẽ gọi showQuestion()
+            }, 300); 
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const question = quizData[currentQuestionIndex];
+            questionText.textContent = question.question;
+            questionCounter.textContent = `Câu ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+            // Xáo trộn các lựa chọn một cách đáng tin cậy
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border-2', 'border-gray-200', 'rounded-lg', 'text-gray-900', 'transition-all', 'duration-200', 'font-medium');
+                button.addEventListener('click', () => selectAnswer(button, option, question.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            // Điều chỉnh chiều cao sau khi câu hỏi mới được hiển thị
+            adjustCardHeight(quizContainer);
+        }
+
+        function resetState() {
+            optionsContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+            feedbackText.textContent = '';
+            answerSelected = false;
+        }
+
+        function selectAnswer(selectedButton, selectedOption, correctAnswer) {
+            if (answerSelected) return;
+            answerSelected = true;
+
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackText.textContent = 'Chính xác!';
+                feedbackText.style.color = '#111827'; // gray-900
+            } else {
+                feedbackText.textContent = `Sai rồi!`;
+                feedbackText.style.color = '#6b7280'; // gray-500
+                selectedButton.classList.add('incorrect');
+            }
+
+            if (currentQuestionIndex < quizData.length - 1) {
+                nextBtn.textContent = 'Câu tiếp theo';
+            } else {
+                nextBtn.textContent = 'Xem kết quả';
+            }
+            nextBtn.style.display = 'block';
+
+            // Điều chỉnh chiều cao sau khi nút "Next" và feedback xuất hiện
+            adjustCardHeight(quizContainer);
+        }
+
+        function showResultsAnimation() {
+            // Ẩn quiz
+            quizContainer.style.opacity = 0;
+            quizContainer.style.transform = 'scale(0.95)';
+            quizContainer.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                // Hiện kết quả
+                resultsContainer.style.opacity = 1;
+                resultsContainer.style.transform = 'scale(1)';
+                resultsContainer.style.pointerEvents = 'auto';
+                scoreText.textContent = `${score} / ${quizData.length}`;
+                adjustCardHeight(resultsContainer);
+            }, 300);
+        }
+
+        // -- THÊM CÁC EVENT LISTENER --
+        
+        levelTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                levelTabs.forEach(t => t.classList.remove('active-tab'));
+                tab.classList.add('active-tab');
+                selectedLevel = tab.dataset.level;
+                generateBtn.disabled = false;
+                generateBtnText.textContent = `Tạo 10 câu hỏi (Cấp độ: ${selectedLevel})`;
+            });
+        });
+
+        generateBtn.addEventListener('click', generateQuiz);
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(); 
+            } else {
+                showResultsAnimation(); 
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            // Ẩn kết quả
+            resultsContainer.style.opacity = 0;
+            resultsContainer.style.transform = 'scale(0.95)';
+            resultsContainer.style.pointerEvents = 'none';
+            // Ẩn anchor
+            anchorBox.style.opacity = 0;
+            anchorBox.style.transform = 'scale(0.9)';
+            anchorBox.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                // Hiện generator
+                generatorContainer.style.opacity = 1;
+                generatorContainer.style.transform = 'scale(1)';
+                generatorContainer.style.pointerEvents = 'auto';
+                adjustCardHeight(generatorContainer);
+
+                // Reset trạng thái
+                selectedLevel = null;
+                levelTabs.forEach(tab => {
+                    tab.classList.remove('active-tab');
+                    tab.disabled = false;
+                });
+                generateBtn.disabled = true;
+                generateBtnText.textContent = 'Chọn cấp độ để bắt đầu';
+                errorMessage.textContent = '';
+            }, 300);
+        });
+
+        // Xóa các lớp CSS cũ (đã được thay thế bằng JS 'style')
+        // Đây là bước dọn dẹp để tránh xung đột
+        document.querySelectorAll('.view-layer').forEach(el => {
+            el.classList.remove('opacity-0', 'scale-95', 'pointer-events-none', 'scale-100');
+        });
+        // Thiết lập trạng thái ban đầu bằng JS
+        generatorContainer.style.opacity = 1;
+        generatorContainer.style.transform = 'scale(1)';
+        generatorContainer.style.pointerEvents = 'auto';
+
+        quizContainer.style.opacity = 0;
+        quizContainer.style.transform = 'scale(0.95)';
+        quizContainer.style.pointerEvents = 'none';
+
+        resultsContainer.style.opacity = 0;
+        resultsContainer.style.transform = 'scale(0.95)';
+        resultsContainer.style.pointerEvents = 'none';
+
+        anchorBox.style.opacity = 0;
+        anchorBox.style.transform = 'scale(0.9)';
+        anchorBox.style.pointerEvents = 'none';
+
+    }); // <-- Đóng DOMContentLoaded
+    </script>
+</body>
+</html>

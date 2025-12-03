@@ -24,6 +24,7 @@ import Comments from "./Comments"
 import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import HomeLists from "./HomeLists" // <--- Đã thêm dòng này
+import ExerciseWidget from "./ExerciseWidget"
 
 export {
   ArticleTitle,
@@ -52,4 +53,5 @@ export {
   Flex,
   ConditionalRender,
   HomeLists, // <--- Đã thêm dòng này
+  ExerciseWidget,
 }

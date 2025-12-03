@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm: Bằng chứng Xã hội</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Sử dụng font Inter làm font chữ mặc định */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Tùy chỉnh lớp cho label khi được chọn và sai */
+        .label-correct {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            border-color: #6b7280; /* border-gray-500 */
+            font-weight: 600; /* font-semibold */
+        }
+
+        .label-incorrect {
+            background-color: #f9fafb; /* bg-gray-50 */
+            text-decoration: line-through;
+            color: #6b7280; /* text-gray-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <div class="bg-white w-full max-w-2xl p-6 md:p-10 rounded-2xl shadow-xl">
+        
+        <!-- Tiêu đề Quiz -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Trắc nghiệm: Bằng chứng Xã hội</h1>
+            <p class="text-gray-600">Kiểm tra hiểu biết của bạn về khái niệm Bằng chứng Xã hội (Social Proof).</p>
+        </div>
+
+        <!-- Form Quiz -->
+        <form id="quiz-form">
+            
+            <!-- Câu hỏi 1 -->
+            <div class="question-container mb-8">
+                <p class="text-lg font-semibold text-gray-800 mb-4">Câu 1: Tư duy cốt lõi của Bằng chứng Xã hội là gì?</p>
+                <div class="space-y-3">
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q1" value="A" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">A. "Mình phải có sản phẩm này vì nó sắp hết hàng."</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q1" value="B" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">B. "Nếu nhiều người (giống mình) đang làm điều đó, thì đó hẳn là điều đúng đắn."</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q1" value="C" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">C. "Sản phẩm này đắt tiền, vậy nó phải tốt."</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q1" value="D" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">D. "Một chuyên gia nói nó tốt, nên mình không cần suy nghĩ."</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Câu hỏi 2 -->
+            <div class="question-container mb-8">
+                <p class="text-lg font-semibold text-gray-800 mb-4">Câu 2: Một website bán hàng hiển thị "Đã bán 10.000+ sản phẩm". Đây là loại Bằng chứng Xã hội nào?</p>
+                <div class="space-y-3">
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q2" value="A" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">A. Chuyên gia (Expert Social Proof)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q2" value="B" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">B. Khách hàng (User Social Proof)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q2" value="C" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">C. "Trí tuệ" Đám đông (Wisdom of the Crowds)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q2" value="D" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">D. Người nổi tiếng (Celebrity Social Proof)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Câu hỏi 3 -->
+            <div class="question-container mb-8">
+                <p class="text-lg font-semibold text-gray-800 mb-4">Câu 3: Một nhãn hàng kem đánh răng chạy quảng cáo với thông điệp "Được 9/10 Bác sĩ Nha khoa khuyên dùng". Đây là loại Bằng chứng Xã hội nào?</p>
+                <div class="space-y-3">
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q3" value="A" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">A. Chuyên gia (Expert Social Proof)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q3" value="B" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">B. Khách hàng (User Social Proof)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q3" value="C" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">C. "Trí tuệ" Đám đông (Wisdom of the Crowds)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q3" value="D" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">D. Bạn bè & Gia đình (Wisdom of Friends)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Câu hỏi 4 -->
+            <div class="question-container mb-8">
+                <p class="text-lg font-semibold text-gray-800 mb-4">Câu 4: Khi khách hàng tự quay video "unboxing" (đập hộp) sản phẩm của bạn và đăng lên TikTok, đó là một ví dụ cụ thể của...?</p>
+                <div class="space-y-3">
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q4" value="A" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">A. Influencer Marketing</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q4" value="B" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">B. User-Generated Content (UGC)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q4" value="C" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">C. Quan hệ Công chúng (PR)</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q4" value="D" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">D. Celebrity Social Proof</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Câu hỏi 5 -->
+            <div class="question-container mb-8">
+                <p class="text-lg font-semibold text-gray-800 mb-4">Câu 5: Loại Bằng chứng Xã hội nào thường được coi là mạnh mẽ và đáng tin cậy nhất?</p>
+                <div class="space-y-3">
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q5" value="A" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">A. Khách hàng (User Social Proof) - như testimonials, reviews.</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q5" value="B" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">B. Người nổi tiếng (Celebrity Social Proof) - như đại sứ thương hiệu.</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q5" value="C" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">C. Chuyên gia (Expert Social Proof) - như chứng nhận ISO.</span>
+                    </label>
+                    <label class="flex items-center w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="q5" value="D" class="w-4 h-4 text-gray-800 border-gray-400 mr-3 focus:ring-gray-700">
+                        <span class="flex-1 text-gray-700">D. Đám đông (Wisdom of the Crowds) - như số lượng đã bán.</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Vùng hiển thị kết quả -->
+            <div id="result-container" class="text-center mt-10 mb-6 hidden">
+                <h2 id="result-message" class="text-2xl font-bold text-gray-900"></h2>
+            </div>
+
+            <!-- Nút Nộp bài / Làm lại -->
+            <div class="text-center">
+                <button type="button" id="submit-btn" class="w-full md:w-auto bg-gray-900 text-white px-10 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-all duration-200">
+                    Nộp bài
+                </button>
+                <button type="button" id="reset-btn" class="w-full md:w-auto hidden bg-gray-200 text-gray-800 px-10 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-200">
+                    Làm lại
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitBtn = document.getElementById('submit-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const resultContainer = document.getElementById('result-container');
+            const resultMessage = document.getElementById('result-message');
+            
+            // Mảng chứa các đáp án đúng
+            const correctAnswers = ['B', 'C', 'A', 'B', 'A'];
+            const questions = document.querySelectorAll('.question-container');
+
+            // Xử lý khi nộp bài
+            submitBtn.addEventListener('click', () => {
+                let score = 0;
+
+                questions.forEach((question, index) => {
+                    const radios = question.querySelectorAll('input[type="radio"]');
+                    const selectedRadio = question.querySelector('input[type="radio"]:checked');
+                    const correctAnswer = correctAnswers[index];
+
+                    radios.forEach(radio => {
+                        radio.disabled = true; // Vô hiệu hóa tất cả các lựa chọn
+                        const label = radio.closest('label');
+
+                        // Đánh dấu đáp án đúng
+                        if (radio.value === correctAnswer) {
+                            label.classList.add('label-correct');
+                        }
+
+                        // Kiểm tra lựa chọn của người dùng
+                        if (selectedRadio && selectedRadio === radio) {
+                            if (radio.value === correctAnswer) {
+                                score++; // Cộng điểm nếu chọn đúng
+                            } else {
+                                // Đánh dấu lựa chọn sai của người dùng
+                                label.classList.add('label-incorrect');
+                            }
+                        }
+                    });
+                });
+
+                // Hiển thị kết quả
+                resultMessage.textContent = `Bạn đã trả lời đúng ${score} / ${correctAnswers.length} câu!`;
+                resultContainer.classList.remove('hidden');
+                
+                // Ẩn nút Nộp bài, hiện nút Làm lại
+                submitBtn.classList.add('hidden');
+                resetBtn.classList.remove('hidden');
+            });
+
+            // Xử lý khi làm lại
+            resetBtn.addEventListener('click', () => {
+                questions.forEach(question => {
+                    const radios = question.querySelectorAll('input[type="radio"]');
+                    radios.forEach(radio => {
+                        radio.disabled = false;
+                        radio.checked = false;
+                        const label = radio.closest('label');
+                        // Xóa các lớp đánh dấu
+                        label.classList.remove('label-correct', 'label-incorrect');
+                    });
+                });
+
+                // Ẩn kết quả và nút Làm lại, hiện nút Nộp bài
+                resultContainer.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            });
+        });
+    </script>
+
+</body>
+</html>

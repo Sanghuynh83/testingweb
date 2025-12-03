@@ -1,26 +1,33 @@
-// 1. Tinh chỉnh Typography
+@use "./base.scss";
+
+// ===========================================================================
+// GIAO DIỆN V5 - TINH TẾ & KHẮC PHỤC LỖI LAYOUT
+// ===========================================================================
+
+// 1. Typography (Font chữ)
 h1,
 h2,
 h3,
 h4 {
     font-weight: 600;
-    letter-spacing: -0.02em; // Thu hẹp khoảng cách chữ tiêu đề cho chặt chẽ
+    letter-spacing: -0.02em;
     margin-top: 1.5em;
+    color: var(--secondary);
 }
 
-// 2. Làm mềm các khối (Card UI)
-// Tạo hiệu ứng khung viền bo tròn cho danh sách bài viết trang chủ
+// 2. Card UI cho HomeLists (Danh sách bài viết ở giữa)
 .home-lists .list-group {
     background: var(--light);
     border: 1px solid var(--lightgray);
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); // Đổ bóng siêu nhẹ
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     margin-bottom: 2rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
-        transform: translateY(-2px); // Nhấc nhẹ lên khi di chuột vào
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
         border-color: var(--secondary);
     }
 
@@ -55,27 +62,45 @@ h4 {
 
         &:hover {
             color: var(--secondary);
-            text-decoration: none; // Bỏ gạch chân mặc định
-            background: transparent !important; // Bỏ highlight mặc định
+            text-decoration: none;
+            background: transparent !important;
         }
     }
 }
 
-// 3. Tinh chỉnh Graph View (Cho nó gọn lại)
-.graph {
-    border-radius: 12px;
-    border: 1px solid var(--lightgray);
+// 3. Tinh chỉnh Cột Phải (Sidebar) & Widget Bài Tập
+.right {
+    // Sửa lỗi dính lề
+    padding-left: 1.5rem;
+
+    // Style chung cho các khối trong Sidebar (Graph, TOC, Backlinks, Widget)
+    .graph,
+    .toc,
+    .backlinks,
+    .exercise-widget {
+        background-color: rgba(0, 0, 0, 0.02); // Nền xám siêu nhẹ
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--lightgray);
+        margin-bottom: 1.5rem;
+    }
 }
 
-// 4. Backlinks & TOC (Mục lục)
-.backlinks,
-.toc {
-    background-color: rgba(0, 0, 0, 0.02); // Màu nền siêu nhạt
-    padding: 1rem;
-    border-radius: 8px;
+// 4. Hiệu ứng Scrollbar (Thanh cuộn)
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-// 5. Hiệu ứng Hover cho Link nội bộ
-a.internal {
-    transition: all 0.2s ease-in-out;
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--lightgray);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--tertiary);
 }

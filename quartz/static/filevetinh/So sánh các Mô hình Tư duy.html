@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biểu đồ Radar so sánh các Mô hình Tư duy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; margin: auto; height: 300px; max-width: 320px; }
+        .model-item.active {
+            outline: 2px solid #4f46e5;
+            outline-offset: 2px;
+        }
+        .model-item .checkmark { opacity: 0; transform: scale(0.5); transition: all 0.2s ease-in-out; }
+        .model-item.active .checkmark { opacity: 1; transform: scale(1); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Modal Styles */
+        .modal-backdrop { transition: opacity 0.3s ease-in-out; }
+        .modal-content { transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+        .chat-bubble { max-width: 80%; }
+        .chat-bubble.user { background-color: #4f46e5; color: white; }
+        .chat-bubble.ai { background-color: #e5e7eb; color: #1f2937; }
+        .typing-indicator span { animation: blink 1.4s infinite both; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
+        /* Custom scrollbar */
+        #models-list-container::-webkit-scrollbar, #sidebar-content::-webkit-scrollbar { width: 6px; }
+        #models-list-container::-webkit-scrollbar-track, #sidebar-content::-webkit-scrollbar-track { background: #f1f5f9; }
+        #models-list-container::-webkit-scrollbar-thumb, #sidebar-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        #models-list-container::-webkit-scrollbar-thumb:hover, #sidebar-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="container mx-auto max-w-screen-2xl bg-white/70 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-slate-200">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">So sánh các Mô hình Tư duy</h1>
+            <p class="mt-2 text-lg text-slate-600">Chọn, so sánh, trích xuất và luyện tập các mô hình tư duy hiệu quả.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            
+            <!-- Main Content Area (Model Selection Grid) -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-md p-6 border border-slate-100">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h2 class="text-xl font-semibold">Danh sách Mô hình Tư duy</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="export-csv" class="text-sm bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded-md transition-colors">Trích xuất ra CSV</button>
+                            <button id="clear-selection" class="text-sm bg-slate-500 hover:bg-slate-600 text-white py-1 px-3 rounded-md transition-colors">Xóa lựa chọn</button>
+                        </div>
+                    </div>
+                    <div id="models-list-container" class="max-h-[80vh] overflow-y-auto pr-2">
+                        <!-- Models list will be injected here -->
+                    </div>
+                    <div id="load-more-container" class="text-center mt-4"></div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="lg:col-span-1 lg:sticky lg:top-6">
+                <div id="sidebar-content" class="space-y-6 max-h-[90vh] overflow-y-auto pr-2">
+                    <div class="bg-white rounded-xl shadow-md p-2 border border-slate-100">
+                        <div class="chart-container">
+                            <canvas id="mentalModelChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="chart-data-display" class="bg-white rounded-xl shadow-md p-4 border border-slate-100 text-xs">
+                        <!-- Chart data will be displayed here -->
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-slate-100">
+                        <h3 class="text-lg font-semibold mb-4">Bộ lọc</h3>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <input type="search" id="search-box" placeholder="Tìm kiếm..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <svg class="w-4 h-4 text-slate-400 absolute top-1/2 left-3 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <div id="tags-filter-container" class="text-sm">
+                                <label for="tags-filter-select" class="font-medium text-slate-700">Ngành ứng dụng:</label>
+                                <select id="tags-filter-select" multiple class="w-full mt-1 border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"></select>
+                            </div>
+                            <div id="slider-filter-container" class="space-y-2">
+                                <label for="axis-filter-select" class="text-sm font-medium text-slate-700">Lọc theo điểm:</label>
+                                <div class="flex items-center gap-2">
+                                    <select id="axis-filter-select" class="text-sm border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 flex-grow"></select>
+                                    <span id="slider-value-display" class="text-sm font-semibold text-indigo-600 w-12 text-center">≥ 0.0</span>
+                                </div>
+                                <input type="range" id="score-filter-slider" min="0" max="5" step="0.1" value="0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 min-h-[160px] border border-slate-100">
+                        <div id="explanation-content" class="relative">
+                            <h3 id="explanation-title" class="text-xl font-bold text-indigo-700 mb-2"></h3>
+                            <p id="explanation-text" class="text-slate-600 leading-relaxed"></p>
+                            <button id="practice-button" class="hidden absolute bottom-0 right-0 text-xs bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-semibold py-1 px-3 rounded-full transition-colors">Luyện tập với AI</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-6 text-sm text-slate-500">
+            Nguồn: <a href="https://gemini.google.com/app/8980a16ecca409dc" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">Gemini</a>
+            <span class="mx-2">|</span>
+            <a href="https://docs.google.com/document/d/1yrTYxlfdfmtQMV23yRmTvm1cljLPIrcMNcU1p-UXgIk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">Paper</a>
+        </div>
+    </div>
+    
+    <button id="help-button" class="fixed bottom-4 left-4 w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-transform hover:scale-110"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.105-.448 2.105-1.172 2.828l-1.036 1.036c-.483.483-.875 1.125-1.125 1.828V18M12 21a9 9 0 110-18 9 9 0 010 18z"></path></svg></button>
+    <div id="modal-backdrop" class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0"></div>
+    <div id="chat-modal-content" class="modal-content fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg shadow-xl z-50 hidden transform scale-95 opacity-0"><div class="flex justify-between items-center p-4 border-b"><h3 class="text-lg font-semibold">Luyện tập với Gemini AI</h3><button class="close-modal-button text-slate-400 hover:text-slate-600">&times;</button></div><div id="chat-history" class="p-4 h-96 overflow-y-auto space-y-4"></div><div class="p-4 border-t"><div class="flex gap-2"><input type="text" id="chat-input" placeholder="Nhập câu trả lời của bạn..." class="flex-1 border border-slate-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"><button id="send-chat-button" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700">Gửi</button></div></div></div>
+    <div id="help-modal-content" class="modal-content fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl bg-white rounded-lg shadow-xl z-50 hidden transform scale-95 opacity-0"><div class="flex justify-between items-center p-4 border-b"><h3 class="text-lg font-semibold">Hướng dẫn sử dụng</h3><button class="close-modal-button text-slate-400 hover:text-slate-600">&times;</button></div><div class="p-6 h-[70vh] overflow-y-auto prose max-w-none"><h4>Chào mừng bạn đến với Công cụ So sánh Mô hình Tư duy!</h4><p>Đây là một không gian tương tác để bạn khám phá, so sánh và luyện tập các mô hình tư duy khác nhau. Dưới đây là cách sử dụng các tính năng chính:</p><h5>1. Hệ thống Trọng số (1-10)</h5><ul><li>Mỗi mô hình được gán một <strong>trọng số</strong> từ 1 (cơ bản, nền tảng) đến 10 (phức tạp, chiến lược).</li><li>Trọng số này được thể hiện qua <strong>màu nền</strong> của ô lựa chọn: màu càng sẫm, trọng số càng cao, thể hiện một mô hình tư duy ở bậc cao hơn.</li></ul><h5>2. Biểu đồ Radar & Bảng số liệu</h5><ul><li><strong>Biểu đồ Radar:</strong> Hiển thị trực quan điểm mạnh và yếu của các mô hình tư duy được chọn dựa trên 5 trục: Ứng dụng, Tin cậy, Đơn giản, Mở rộng, và Tầm nhìn mới.</li><li><strong>Bảng số liệu:</strong> Nằm ngay dưới biểu đồ, bảng này cung cấp điểm số chi tiết của các mô hình bạn đã chọn để dễ dàng so sánh.</li></ul><h5>3. Bảng điều khiển (Sidebar)</h5><ul><li><strong>Chọn/Bỏ chọn:</strong> Nhấp vào bất kỳ mô hình nào trong danh sách để thêm hoặc bớt nó khỏi biểu đồ so sánh. Các mô hình đang được chọn sẽ có dấu tick màu xanh.</li><li><strong>Thanh tìm kiếm:</strong> Gõ tên hoặc ngành ứng dụng ("kinh doanh", "sáng tạo") để lọc nhanh danh sách.</li><li><strong>Bộ lọc (Ngành, Điểm):</strong> Sử dụng các bộ lọc để thu hẹp danh sách theo ngành ứng dụng, hoặc điểm số trên một trục cụ thể.</li><li><strong>Tải thêm:</strong> Nếu có nhiều kết quả, nút "Tải thêm" sẽ xuất hiện để bạn xem thêm các mô hình.</li><li><strong>Xóa lựa chọn:</strong> Nút này sẽ xóa tất cả các lựa chọn hiện tại trên biểu đồ.</li></ul><h5>4. Khung Giải thích & Luyện tập</h5><ul><li><strong>Xem giải thích:</strong> Khi bạn chọn một mô hình, mô tả chi tiết của nó sẽ hiện ra ở đây.</li><li><strong>Luyện tập với AI:</strong> Nút này sẽ xuất hiện khi bạn chọn ít nhất một mô hình. Nhấp vào đây để mở cửa sổ chat với Gemini AI. Cuộc trò chuyện sẽ tự động bắt đầu với một bài tập được thiết kế riêng cho các mô hình bạn đã chọn.</li></ul><h5>5. Trích xuất Dữ liệu</h5><p>Nhấp vào nút "Trích xuất ra CSV" để tải về toàn bộ cơ sở dữ liệu của các mô hình tư duy. File này có thể được mở bằng Google Sheets hoặc Excel để bạn tự do phân tích và sử dụng.</p></div></div>
+
+    <script>
+        // DOM Elements
+        const elements = { ctx: document.getElementById('mentalModelChart').getContext('2d'), explanationContent: document.getElementById('explanation-content'), explanationTitle: document.getElementById('explanation-title'), explanationText: document.getElementById('explanation-text'), modelsListContainer: document.getElementById('models-list-container'), searchBox: document.getElementById('search-box'), practiceButton: document.getElementById('practice-button'), chartDataDisplay: document.getElementById('chart-data-display'), categoryFilterTagsContainer: document.getElementById('category-filter-tags'), tagsFilterSelect: document.getElementById('tags-filter-select'), axisFilterSelect: document.getElementById('axis-filter-select'), scoreFilterSlider: document.getElementById('score-filter-slider'), sliderValueDisplay: document.getElementById('slider-value-display'), helpButton: document.getElementById('help-button'), modalBackdrop: document.getElementById('modal-backdrop'), loadMoreContainer: document.getElementById('load-more-container'), modals: { chat: document.getElementById('chat-modal-content'), help: document.getElementById('help-modal-content') }, chat: { history: document.getElementById('chat-history'), input: document.getElementById('chat-input'), sendButton: document.getElementById('send-chat-button') } };
+
+        // Database
+        const database = {
+            config: {
+                axes: ['Ứng dụng', 'Tin cậy', 'Đơn giản', 'Mở rộng', 'Tầm nhìn Mới'],
+            },
+            models: [
+                // --- Mô hình đã có ---
+                { weight: 2.5, label: 'Thiên kiến xác nhận', shortLabel: 'Thiên kiến xác nhận', scores: [5, 5, 4, 5, 4], description: 'Xu hướng tìm kiếm, diễn giải và ghi nhớ thông tin theo cách xác nhận niềm tin sẵn có. Nhận biết để né tránh.', tags: ['Tâm lý học', 'Tư duy phản biện'] },
+                { weight: 2.8, label: 'Hiệu ứng có sẵn', shortLabel: 'Hiệu ứng có sẵn', scores: [5, 5, 4, 5, 4], description: 'Lối tắt tư duy dựa vào các ví dụ xuất hiện ngay lập tức trong đầu, khiến ta đánh giá quá cao thông tin mới hoặc sống động.', tags: ['Tâm lý học', 'Truyền thông'] },
+                { weight: 3.0, label: 'Dao cạo Hanlon', shortLabel: 'Dao cạo Hanlon', scores: [5, 4, 5, 3, 3], description: 'Đừng vội cho rằng ai đó có ác ý khi hành động của họ có thể được giải thích là do sơ suất hoặc thiếu hiểu biết.', tags: ['Giao tiếp', 'Tư duy xã hội'] },
+                { weight: 3.2, label: 'Lỗi quy kết cơ bản', shortLabel: 'Lỗi quy kết', scores: [5, 4, 4, 4, 3], description: 'Khuynh hướng đánh giá quá cao yếu tố cá nhân và xem nhẹ yếu tố tình huống khi giải thích hành vi của người khác.', tags: ['Tâm lý học', 'Tư duy xã hội'] },
+                { weight: 3.5, label: 'Hiệu ứng Dunning-Kruger', shortLabel: 'Dunning-Kruger', scores: [4, 5, 4, 3, 4], description: 'Hiện tượng người có năng lực kém lại đánh giá khả năng của mình cao hơn thực tế, trong khi người giỏi lại có xu hướng đánh giá thấp hơn.', tags: ['Tâm lý học', 'Học tập'] },
+                { weight: 4.0, label: 'Bất hòa Nhận thức', shortLabel: 'Bất hòa Nhận thức', scores: [4, 5, 3, 4, 4], description: 'Sự khó chịu khi một người có hai hay nhiều niềm tin, ý tưởng, hoặc giá trị mâu thuẫn. Thúc đẩy sự thay đổi để giảm mâu thuẫn.', tags: ['Tâm lý học', 'Hành vi'] },
+                { weight: 4.5, label: 'Khung giảm thiểu hối tiếc', shortLabel: 'Giảm thiểu hối tiếc', scores: [4, 3, 5, 3, 4], description: 'Khi đối mặt quyết định khó, hãy tưởng tượng bạn 80 tuổi và nhìn lại. Lựa chọn nào sẽ khiến bạn ít hối tiếc hơn?', tags: ['Phát triển cá nhân', 'Ra quyết định'] },
+                { weight: 5.0, label: 'Nguyên tắc Pareto (80/20)', shortLabel: 'Pareto (80/20)', scores: [5, 4, 5, 4, 3], description: 'Cho rằng 80% kết quả đến từ 20% nguyên nhân. Giúp tập trung vào những yếu tố quan trọng nhất.', tags: ['Năng suất', 'Kinh doanh'] },
+                { weight: 5.2, label: 'Ma trận Eisenhower', shortLabel: 'Ma trận Eisenhower', scores: [5, 4, 5, 4, 2], description: 'Phân loại công việc vào 4 ô dựa trên mức độ Khẩn cấp và Quan trọng để ưu tiên hiệu quả.', tags: ['Năng suất', 'Quản lý thời gian'] },
+                { weight: 5.5, label: 'Dao cạo Occam', shortLabel: 'Dao cạo Occam', scores: [4, 4, 5, 4, 2], description: 'Trong các giả thuyết cạnh tranh, giả thuyết có ít giả định nhất thường là đúng nhất. Ưu tiên sự đơn giản.', tags: ['Khoa học', 'Giải quyết vấn đề'] },
+                { weight: 6.0, label: 'Họp rút kinh nghiệm (AAR)', shortLabel: 'Họp rút kinh nghiệm', scores: [5, 4, 5, 4, 3], description: 'Một cuộc họp có cấu trúc để đánh giá một sự kiện/dự án đã hoàn thành, tập trung vào "Điều gì đã xảy ra?", "Tại sao nó xảy ra?" và "Làm thế nào để cải thiện?".', tags: ['Quản lý dự án', 'Quân đội'] },
+                { weight: 6.5, label: 'Tư duy Đảo ngược', shortLabel: 'Tư duy Đảo ngược', scores: [4, 4, 4, 4, 5], description: 'Thay vì hỏi "Làm sao để thành công?", hãy hỏi "Điều gì dẫn đến thất bại?" và tìm cách tránh nó.', tags: ['Giải quyết vấn đề', 'Quản trị rủi ro'] },
+                { weight: 6.8, label: 'Tư duy Phân nhánh', shortLabel: 'Tư duy Phân nhánh', scores: [3, 3, 2, 4, 5], description: 'Giải quyết vấn đề bằng cách tiếp cận gián tiếp và sáng tạo, không đi theo logic tuần tự thông thường.', tags: ['Sáng tạo', 'Thiết kế'] },
+                { weight: 7.0, label: 'Vòng tròn Năng lực', shortLabel: 'Vòng tròn Năng lực', scores: [5, 5, 5, 3, 2], description: 'Xác định rõ lĩnh vực bạn có chuyên môn và chỉ đưa ra quyết định trong phạm vi đó để tránh sai lầm.', tags: ['Đầu tư', 'Phát triển cá nhân'] },
+                { weight: 7.2, label: '6 chiếc mũ tư duy', shortLabel: '6 chiếc mũ tư duy', scores: [3, 4, 3, 4, 5], description: 'Phương pháp nhìn nhận một vấn đề từ sáu góc độ khác nhau (dữ liệu, cảm xúc, tiêu cực, tích cực, sáng tạo, quy trình) để có quyết định toàn diện.', tags: ['Hội họp', 'Sáng tạo'] },
+                { weight: 7.5, label: 'Thiên kiến Kẻ sống sót', shortLabel: 'Thiên kiến Sống sót', scores: [4, 5, 4, 4, 5], description: 'Chỉ tập trung vào những người/vật đã thành công ("sống sót") và bỏ qua những trường hợp thất bại, dẫn đến kết luận sai lầm.', tags: ['Thống kê', 'Đầu tư'] },
+                { weight: 7.8, label: 'Quét hệ quả', shortLabel: 'Quét hệ quả', scores: [4, 4, 3, 5, 3], description: 'Phương pháp có cấu trúc để xem xét các hệ quả tiềm tàng của một sản phẩm/dịch vụ đối với cá nhân và xã hội.', tags: ['Công nghệ', 'Đạo đức'] },
+                { weight: 8.0, label: 'Hệ thống 1 & 2', shortLabel: 'Hệ thống 1 & 2', scores: [4, 5, 3, 5, 5], description: 'Hiểu hai chế độ tư duy: Hệ thống 1 (nhanh, bản năng) và Hệ thống 2 (chậm, logic) để ra quyết định tốt hơn.', tags: ['Tâm lý học', 'Ra quyết định'] },
+                { weight: 8.2, label: 'Tư duy Hộp đen', shortLabel: 'Tư duy Hộp đen', scores: [4, 5, 3, 4, 4], description: 'Chấp nhận và phân tích thất bại một cách có hệ thống để rút ra bài học, thay vì đổ lỗi hay che giấu sai lầm.', tags: ['Cải tiến', 'An toàn'] },
+                { weight: 8.5, label: 'Vòng lặp Phản hồi', shortLabel: 'Vòng lặp Phản hồi', scores: [5, 5, 4, 5, 3], description: 'Một quy trình mà đầu ra của một hành động được quay lại làm đầu vào cho các hành động trong tương lai, giúp liên tục cải tiến.', tags: ['Học tập', 'Quản lý'] },
+                { weight: 8.8, label: 'Tư duy trong cá cược', shortLabel: 'Tư duy cá cược', scores: [3, 5, 2, 4, 5], description: 'Tách biệt chất lượng của quyết định khỏi kết quả của nó. Một quyết định tốt vẫn có thể dẫn đến kết quả xấu.', tags: ['Đầu tư', 'Xác suất'] },
+                { weight: 9.0, label: 'Tư duy Bậc hai', shortLabel: 'Tư duy Bậc hai', scores: [4, 4, 3, 5, 4], description: 'Xem xét các hệ quả lâu dài của một quyết định, thay vì chỉ tập trung vào kết quả trước mắt.', tags: ['Chiến lược', 'Ra quyết định'] },
+                { weight: 9.2, label: 'Bản đồ không phải là lãnh thổ', shortLabel: 'Bản đồ & Lãnh thổ', scores: [4, 5, 4, 5, 5], description: 'Mô hình, lý thuyết về một sự vật không phải là bản thân sự vật đó. Nhắc nhở rằng mô hình có thể sai sót.', tags: ['Triết học', 'Tư duy phản biện'] },
+                { weight: 9.5, label: 'Tư duy Hệ thống', shortLabel: 'Tư duy Hệ thống', scores: [3, 5, 2, 5, 5], description: 'Hiểu rằng các bộ phận trong một hệ thống tương tác và ảnh hưởng lẫn nhau, tập trung vào mối quan hệ thay vì các thành phần riêng lẻ.', tags: ['Quản lý', 'Khoa học'] },
+                { weight: 9.8, label: 'Tư duy Nguyên tắc đầu tiên', shortLabel: 'Nguyên tắc đầu tiên', scores: [3, 5, 2, 4, 5], description: 'Phá vỡ vấn đề thành những chân lý cơ bản nhất để xây dựng giải pháp đột phá từ gốc rễ.', tags: ['Sáng tạo', 'Kinh doanh', 'Khoa học'] },
+                
+                // --- Bổ sung các mô hình mới ---
+                { weight: 1.5, label: 'Hiệu ứng hào quang', shortLabel: 'Hiệu ứng hào quang', scores: [5, 4, 4, 4, 3], description: 'Xu hướng để một ấn tượng tổng thể tích cực về một người ảnh hưởng đến cách chúng ta cảm nhận và đánh giá các đặc điểm cụ thể của họ.', tags: ['Tâm lý học', 'Nhận thức xã hội'] },
+                { weight: 2.9, label: 'Tư duy khan hiếm', shortLabel: 'Tư duy khan hiếm', scores: [5, 5, 4, 4, 3], description: 'Trạng thái tâm lý khi một người cảm thấy thiếu thốn một thứ gì đó (tiền bạc, thời gian), dẫn đến việc tập trung quá mức vào nó và ra quyết định kém.', tags: ['Tâm lý học', 'Kinh tế', 'Hành vi'] },
+                { weight: 3.8, label: 'Tháp nhu cầu Maslow', shortLabel: 'Tháp Maslow', scores: [4, 3, 4, 4, 4], description: 'Một lý thuyết về động lực, cho rằng con người cần thỏa mãn các nhu cầu cơ bản (sinh lý, an toàn) trước khi hướng đến các nhu cầu cao hơn (xã hội, được tôn trọng, thể hiện bản thân).', tags: ['Tâm lý học', 'Marketing', 'Quản lý'] },
+                { weight: 4.8, label: 'Chi phí cơ hội', shortLabel: 'Chi phí cơ hội', scores: [5, 5, 5, 4, 3], description: 'Giá trị của lựa chọn tốt nhất bị bỏ qua khi đưa ra một quyết định. Nhắc nhở rằng mọi lựa chọn đều có sự đánh đổi.', tags: ['Kinh tế', 'Ra quyết định', 'Phát triển cá nhân'] },
+                { weight: 5.8, label: 'Lợi tức giảm dần', shortLabel: 'Lợi tức giảm dần', scores: [5, 5, 4, 4, 3], description: 'Trong một quy trình, việc thêm một đơn vị đầu vào sẽ đến một lúc nào đó chỉ mang lại mức tăng đầu ra thấp hơn. Giúp nhận biết khi nào nên dừng lại.', tags: ['Kinh tế', 'Năng suất', 'Chiến lược'] },
+                { weight: 6.2, label: '5 câu hỏi Tại sao', shortLabel: '5 Whys', scores: [5, 4, 5, 3, 2], description: 'Một kỹ thuật lặp đi lặp lại để khám phá mối quan hệ nhân quả gốc rễ của một vấn đề bằng cách liên tục hỏi "Tại sao?".', tags: ['Giải quyết vấn đề', 'Quản lý chất lượng'] },
+                { weight: 6.7, label: 'Via Negativa', shortLabel: 'Via Negativa', scores: [4, 4, 5, 3, 4], description: 'Tập trung vào những gì cần loại bỏ, tránh né thay vì những gì cần thêm vào để đạt được sự cải thiện. Triết lý của sự tối giản và loại trừ rủi ro.', tags: ['Triết học', 'Tối giản', 'Sức khỏe'] },
+                { weight: 8.7, label: 'Lý thuyết Thiên nga đen', shortLabel: 'Thiên nga đen', scores: [3, 4, 3, 5, 5], description: 'Mô tả những sự kiện cực kỳ hiếm gặp, có tác động cực lớn và chỉ có thể được giải thích sau khi chúng đã xảy ra. Nhấn mạnh giới hạn của việc dự báo.', tags: ['Quản trị rủi ro', 'Tài chính', 'Chiến lược'] },
+                { weight: 9.6, label: 'Nghịch lý lựa chọn', shortLabel: 'Nghịch lý lựa chọn', scores: [4, 5, 3, 4, 4], description: 'Khi có quá nhiều lựa chọn, con người có xu hướng cảm thấy lo lắng, thiếu hài lòng và thậm chí không thể đưa ra quyết định.', tags: ['Tâm lý học', 'Marketing', 'Ra quyết định'] }
+            ].sort((a,b) => a.weight - b.weight) // Sort by weight
+        };
+
+        // State
+        let selectedIndices = new Set();
+        let chatHistory = [];
+        let systemPrompt = "";
+        let itemsToShow = 24;
+        const itemsPerLoad = 24;
+
+        // Chart Initialization
+        const chartData = {
+            labels: database.config.axes,
+            datasets: database.models.map(model => {
+                const lightness = 100 - (model.weight * 8);
+                const color = `hsl(240, 5%, ${lightness}%)`;
+                const colorWithAlpha = `hsla(240, 5%, ${lightness}%, 0.2)`;
+                return {
+                    label: model.label,
+                    data: model.scores,
+                    backgroundColor: colorWithAlpha,
+                    borderColor: color,
+                    pointBackgroundColor: color,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: color,
+                    borderWidth: 2,
+                    hidden: true
+                }
+            })
+        };
+        const chart = new Chart(elements.ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.r}` } } }, scales: { r: { angleLines: { color: 'rgba(0,0,0,0.1)' }, grid: { color: 'rgba(0,0,0,0.1)' }, pointLabels: { font: { size: 11, weight: '500' }, color: '#374151' }, ticks: { beginAtZero: true, max: 5, stepSize: 1, backdropColor: 'rgba(255,255,255,0.75)', color: '#6b7280' } } } } });
+
+        // Functions
+        const tagColorClasses = [ 'bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-yellow-100 text-yellow-800', 'bg-purple-100 text-purple-800', 'bg-pink-100 text-pink-800', 'bg-red-100 text-red-800', 'bg-indigo-100 text-indigo-800', 'bg-teal-100 text-teal-800' ];
+        const getTagColor = (tag) => { let hash = 0; for (let i = 0; i < tag.length; i++) { hash = tag.charCodeAt(i) + ((hash << 5) - hash); } return tagColorClasses[Math.abs(hash) % tagColorClasses.length]; };
+        
+        function getFilteredModels() {
+            const query = elements.searchBox.value.toLowerCase();
+            const axisIndex = elements.axisFilterSelect.value;
+            const minScore = parseFloat(elements.scoreFilterSlider.value);
+            const activeTagsFilter = new Set(Array.from(elements.tagsFilterSelect.selectedOptions).map(opt => opt.value));
+
+            return database.models.filter(model => {
+                const searchMatch = model.label.toLowerCase().includes(query) || model.tags.some(t => t.toLowerCase().includes(query));
+                const scoreMatch = model.scores[axisIndex] >= minScore;
+                const tagsMatch = activeTagsFilter.size === 0 || [...activeTagsFilter].every(tag => model.tags.includes(tag));
+                return searchMatch && scoreMatch && tagsMatch;
+            });
+        }
+        
+        function renderModelList() {
+            elements.modelsListContainer.innerHTML = '';
+            const filteredModels = getFilteredModels();
+            const modelsToDisplay = filteredModels.slice(0, itemsToShow);
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2';
+            
+            if (modelsToDisplay.length > 0) {
+                modelsToDisplay.forEach(model => {
+                    const index = database.models.indexOf(model);
+                    const lightness = 100 - (model.weight * 8);
+                    const textColor = lightness < 50 ? 'text-white' : 'text-slate-800';
+                    const item = document.createElement('div');
+                    item.className = `model-item flex flex-col p-2 text-xs rounded-lg border border-slate-200 hover:border-indigo-400 cursor-pointer transition-all ${textColor}`;
+                    item.style.backgroundColor = `hsl(240, 5%, ${lightness}%)`;
+                    if (selectedIndices.has(index)) item.classList.add('active');
+                    item.dataset.index = index;
+                    const displayLabel = `[${model.weight.toFixed(1)}] ${model.shortLabel}`;
+                    item.innerHTML = `<div class="flex justify-between items-center w-full"><span class="font-medium truncate" title="${model.label}">${displayLabel}</span><div class="checkmark text-green-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg></div></div>`;
+                    item.addEventListener('click', () => handleSelection(index));
+                    gridContainer.appendChild(item);
+                });
+                elements.modelsListContainer.appendChild(gridContainer);
+            } else {
+                elements.modelsListContainer.innerHTML = `<p class="text-center text-slate-500 py-8">Không tìm thấy mô hình nào.</p>`;
+            }
+
+            elements.loadMoreContainer.innerHTML = '';
+            if (filteredModels.length > itemsToShow) {
+                const loadMoreButton = document.createElement('button');
+                loadMoreButton.className = 'text-sm bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-md transition-colors';
+                loadMoreButton.textContent = `Tải thêm (${filteredModels.length - itemsToShow} nữa)`;
+                loadMoreButton.addEventListener('click', () => { itemsToShow += itemsPerLoad; renderModelList(); });
+                elements.loadMoreContainer.appendChild(loadMoreButton);
+            }
+        }
+        
+        function handleSelection(index) {
+            const itemElement = document.querySelector(`.model-item[data-index='${index}']`);
+            if (selectedIndices.has(index)) {
+                selectedIndices.delete(index);
+                if (itemElement) itemElement.classList.remove('active');
+            } else {
+                selectedIndices.add(index);
+                if (itemElement) itemElement.classList.add('active');
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            chart.data.datasets.forEach((_, index) => { chart.getDatasetMeta(index).hidden = !selectedIndices.has(index); });
+            chart.update();
+            elements.explanationContent.classList.remove('fade-in');
+            void elements.explanationContent.offsetWidth; 
+            if (selectedIndices.size > 0) {
+                const lastSelectedIndex = [...selectedIndices].pop();
+                const model = database.models[lastSelectedIndex];
+                elements.explanationTitle.innerText = `[${model.weight.toFixed(1)}] ${model.label}`;
+                elements.explanationText.innerText = model.description;
+                elements.practiceButton.classList.remove('hidden');
+            } else {
+                elements.explanationTitle.innerText = 'Chào mừng bạn!';
+                elements.explanationText.innerText = 'Hãy chọn một hoặc nhiều mô hình tư duy từ danh sách để bắt đầu khám phá và so sánh chúng trên biểu đồ radar.';
+                elements.practiceButton.classList.add('hidden');
+            }
+            elements.explanationContent.classList.add('fade-in');
+            updateChartDataDisplay();
+        }
+
+        function updateChartDataDisplay() {
+            if (selectedIndices.size === 0) {
+                elements.chartDataDisplay.innerHTML = '<p class="text-center text-slate-500">Chọn một mô hình để xem số liệu.</p>';
+                return;
+            }
+            let tableHTML = '<table class="w-full"><thead><tr class="text-left">';
+            tableHTML += '<th>Mô hình</th>';
+            database.config.axes.forEach(axis => tableHTML += `<th class="text-center" title="${axis}">${axis.substring(0,1)}</th>`);
+            tableHTML += '</tr></thead><tbody>';
+            selectedIndices.forEach(index => {
+                const model = database.models[index];
+                tableHTML += `<tr class="border-t border-slate-200"><td class="font-medium py-1">[${model.weight.toFixed(1)}] ${model.shortLabel}</td>`;
+                model.scores.forEach(score => tableHTML += `<td class="text-center text-slate-600">${score}</td>`);
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+            elements.chartDataDisplay.innerHTML = tableHTML;
+        }
+        
+        function setupFilters() {
+            const allTags = [...new Set(database.models.flatMap(model => model.tags))].sort();
+            allTags.forEach(tag => { const option = document.createElement('option'); option.value = tag; option.textContent = tag; elements.tagsFilterSelect.appendChild(option); });
+            elements.tagsFilterSelect.addEventListener('change', () => { itemsToShow = itemsPerLoad; renderModelList(); });
+
+            database.config.axes.forEach((axis, index) => { const option = document.createElement('option'); option.value = index; option.textContent = axis; elements.axisFilterSelect.appendChild(option); });
+            const handleFilterChange = () => { itemsToShow = itemsPerLoad; renderModelList(); };
+            elements.scoreFilterSlider.addEventListener('input', () => { elements.sliderValueDisplay.textContent = `≥ ${parseFloat(elements.scoreFilterSlider.value).toFixed(1)}`; });
+            elements.scoreFilterSlider.addEventListener('change', handleFilterChange); // Only filter on release
+            elements.axisFilterSelect.addEventListener('change', handleFilterChange);
+        }
+
+        function openModal(modal) { elements.modalBackdrop.classList.remove('hidden'); modal.classList.remove('hidden'); setTimeout(() => { elements.modalBackdrop.classList.remove('opacity-0'); modal.classList.remove('scale-95', 'opacity-0'); }, 10); }
+        function closeModal() { const modal = document.querySelector('.modal-content:not(.hidden)'); if(modal) { modal.classList.add('scale-95', 'opacity-0'); elements.modalBackdrop.classList.add('opacity-0'); setTimeout(() => { modal.classList.add('hidden'); elements.modalBackdrop.classList.add('hidden'); }, 300); } }
+        
+        async function startAICoachingSession() {
+            if (selectedIndices.size === 0) return;
+            chatHistory = []; systemPrompt = generateSystemPrompt(); elements.chat.history.innerHTML = ''; openModal(elements.modals.chat);
+            elements.chat.input.disabled = true; elements.chat.sendButton.disabled = true;
+            const typingIndicator = document.createElement('div'); typingIndicator.className = 'typing-indicator self-start flex gap-1.5 p-3'; typingIndicator.innerHTML = `<span class="w-2 h-2 bg-slate-400 rounded-full"></span><span class="w-2 h-2 bg-slate-400 rounded-full"></span><span class="w-2 h-2 bg-slate-400 rounded-full"></span>`;
+            elements.chat.history.appendChild(typingIndicator); elements.chat.history.scrollTop = elements.chat.history.scrollHeight;
+            const initialUserMessageForAI = { role: 'user', parts: [{ text: "Hãy bắt đầu. Vui lòng đưa ra tình huống/bài tập đầu tiên." }] };
+            try {
+                const apiKey = ""; // API key will be provided by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: [initialUserMessageForAI], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                const result = await response.json(); const aiMessage = result.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời lúc này.";
+                chatHistory.push(initialUserMessageForAI); addMessageToChat('ai', aiMessage);
+            } catch (error) { console.error("Error calling Gemini API:", error); addMessageToChat('ai', "Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau."); } 
+            finally { typingIndicator.remove(); elements.chat.input.disabled = false; elements.chat.sendButton.disabled = false; elements.chat.input.focus(); }
+        }
+        
+        function addMessageToChat(sender, message) { const bubble = document.createElement('div'); bubble.className = `chat-bubble p-3 rounded-lg ${sender === 'user' ? 'user self-end' : 'ai self-start'}`; bubble.innerHTML = message.replace(/\n/g, '<br>'); elements.chat.history.appendChild(bubble); elements.chat.history.scrollTop = elements.chat.history.scrollHeight; if(sender !== 'indicator') { chatHistory.push({ role: sender === 'user' ? 'user' : 'model', parts: [{ text: message }] }); } }
+
+        async function sendMessageToAI() {
+            const userMessage = elements.chat.input.value.trim(); if (!userMessage) return; addMessageToChat('user', userMessage);
+            elements.chat.input.value = ''; elements.chat.input.disabled = true; elements.chat.sendButton.disabled = true;
+            const typingIndicator = document.createElement('div'); typingIndicator.className = 'typing-indicator self-start flex gap-1.5 p-3'; typingIndicator.innerHTML = `<span class="w-2 h-2 bg-slate-400 rounded-full"></span><span class="w-2 h-2 bg-slate-400 rounded-full"></span><span class="w-2 h-2 bg-slate-400 rounded-full"></span>`;
+            elements.chat.history.appendChild(typingIndicator); elements.chat.history.scrollTop = elements.chat.history.scrollHeight;
+            try {
+                const apiKey = ""; // API key will be provided by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: chatHistory, systemInstruction: { parts: [{ text: systemPrompt }] } };
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                const result = await response.json(); const aiMessage = result.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, tôi không thể trả lời lúc này.";
+                addMessageToChat('ai', aiMessage);
+            } catch (error) { console.error("Error calling Gemini API:", error); addMessageToChat('ai', "Đã xảy ra lỗi. Vui lòng thử lại sau."); }
+            finally { typingIndicator.remove(); elements.chat.input.disabled = false; elements.chat.sendButton.disabled = false; elements.chat.input.focus(); }
+        }
+        
+        function generateSystemPrompt() {
+            if (selectedIndices.size === 0) return "";
+            const selectedModels = [...selectedIndices].map(i => database.models[i]);
+            if (selectedModels.length === 1) { const model = selectedModels[0]; return `Bạn là một chuyên gia AI về các mô hình tư duy, đóng vai trò là một người huấn luyện (coach). Mục tiêu: Giúp tôi luyện tập sâu sắc mô hình tư duy: "${model.label}". Mô tả: "${model.description}". Yêu cầu: Đưa ra một tình huống thực tế, cụ thể. Đặt câu hỏi dẫn dắt từng bước để tôi áp dụng mô hình giải quyết. Chờ tôi trả lời rồi mới hỏi tiếp. Luôn ngắn gọn, tập trung.`; }
+            else { return `Bạn là một chuyên gia AI về các mô hình tư duy, đóng vai trò là một người huấn luyện (coach). Mục tiêu: Giúp tôi luyện tập kết hợp các mô hình tư duy sau: ${selectedModels.map(m => `"${m.label}"`).join(', ')}. Yêu cầu: Tạo ra một tình huống phức tạp. Đặt câu hỏi dẫn dắt để tôi nhận biết khi nào nên dùng mô hình nào. Chờ tôi trả lời rồi mới hỏi tiếp. Luôn ngắn gọn.`; }
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,"; const headers = ["ID", "Weight", "Label", "ShortLabel", "Description", "Tags", ...database.config.axes];
+            csvContent += headers.join(",") + "\r\n";
+            database.models.forEach((model, index) => { const description = `"${model.description.replace(/"/g, '""')}"`; const tags = `"${model.tags.join('; ')}"`; const row = [index + 1, model.weight, model.label, model.shortLabel, description, tags, ...model.scores]; csvContent += row.join(",") + "\r\n"; });
+            const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "mental_models_database.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        // Event Listeners
+        document.getElementById('clear-selection').addEventListener('click', () => { selectedIndices.clear(); itemsToShow = itemsPerLoad; renderModelList(); updateUI(); });
+        elements.searchBox.addEventListener('input', () => { itemsToShow = itemsPerLoad; renderModelList(); });
+        elements.practiceButton.addEventListener('click', startAICoachingSession);
+        elements.helpButton.addEventListener('click', () => openModal(elements.modals.help));
+        document.querySelectorAll('.close-modal-button').forEach(btn => btn.addEventListener('click', closeModal));
+        elements.modalBackdrop.addEventListener('click', closeModal);
+        elements.chat.sendButton.addEventListener('click', sendMessageToAI);
+        elements.chat.input.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessageToAI(); } });
+        document.getElementById('export-csv').addEventListener('click', exportToCSV);
+
+        // Initial render
+        setupFilters();
+        renderModelList();
+        updateUI();
+    </script>
+</body>
+</html>
+
+
+

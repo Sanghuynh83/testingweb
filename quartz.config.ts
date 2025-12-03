@@ -17,7 +17,7 @@ const config: QuartzConfig = {
     },
     locale: "en-US",
     // Thay thế bằng đường dẫn repo của bạn
-    baseUrl: "sanghuynh83.github.io/testingweb",
+    baseUrl: "sanghuynh83.github.io",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
