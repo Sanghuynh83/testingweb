@@ -1,8 +1,8 @@
 ---
-title: Trang Chủ Wiki
+title: Trang Chủ
 ---
 
-Chào mừng đến với Wiki của Sang Huynh.
+Chào mừng đến với Wiki của mình.
 
 ### Danh sách bài viết:
 - [[content/Tài sản Thương hiệu (Brand Equity) - Testing file]]
